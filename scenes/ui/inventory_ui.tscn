@@ -1,0 +1,82 @@
+[gd_scene load_steps=3 format=3 uid="uid://invui01panel"]
+
+[ext_resource type="Script" path="res://scripts/ui/inventory_ui.gd" id="1_inv"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.08, 0.08, 0.1, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.32, 0.28, 1)
+
+[node name="InventoryUI" type="CanvasLayer"]
+layer = 20
+script = ExtResource("1_inv")
+
+[node name="Panel" type="PanelContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -200.0
+offset_right = 280.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "INVENTORY"
+horizontal_alignment = 1
+
+[node name="SlotGrid" type="GridContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 4
+
+[node name="DetailPanel" type="VBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="NameLabel" type="Label" parent="Panel/Margin/VBox/DetailPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Select an item"
+
+[node name="DescLabel" type="Label" parent="Panel/Margin/VBox/DetailPanel"]
+layout_mode = 2
+autowrap_mode = 3
+text = ""
+
+[node name="ButtonRow" type="HBoxContainer" parent="Panel/Margin/VBox/DetailPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="UseButton" type="Button" parent="Panel/Margin/VBox/DetailPanel/ButtonRow"]
+layout_mode = 2
+text = "Use"
+
+[node name="DropButton" type="Button" parent="Panel/Margin/VBox/DetailPanel/ButtonRow"]
+layout_mode = 2
+text = "Drop"
+
+[node name="CombineButton" type="Button" parent="Panel/Margin/VBox/DetailPanel/ButtonRow"]
+layout_mode = 2
+text = "Combine"

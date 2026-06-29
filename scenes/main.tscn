@@ -1,0 +1,67 @@
+[gd_scene load_steps=7 format=3 uid="uid://c8k2psxmain01"]
+
+[ext_resource type="Script" path="res://scripts/psx_viewport_setup.gd" id="1_setup"]
+[ext_resource type="PackedScene" uid="uid://lobby01scene" path="res://scenes/levels/lobby.tscn" id="2_room"]
+[ext_resource type="PackedScene" uid="uid://nativehud01" path="res://scenes/ui/native_hud.tscn" id="3_native_hud"]
+[ext_resource type="Shader" path="res://shaders/psx_dither.gdshader" id="4_dither_shader"]
+[ext_resource type="PackedScene" uid="uid://pausemenu01psx" path="res://scenes/ui/pause_menu.tscn" id="5_pause_menu"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dither"]
+shader = ExtResource("4_dither_shader")
+shader_parameter/color_depth = 5
+shader_parameter/dither_strength = 1.0
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_setup")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+texture_filter = 0
+
+[node name="GameViewport" type="SubViewport" parent="SubViewportContainer"]
+handle_input_locally = true
+size = Vector2i(320, 180)
+render_target_update_mode = 4
+
+[node name="Lobby" parent="SubViewportContainer/GameViewport" instance=ExtResource("2_room")]
+
+[node name="BackBufferCopy" type="BackBufferCopy" parent="SubViewportContainer/GameViewport"]
+copy_mode = 2
+
+[node name="DitherLayer" type="CanvasLayer" parent="SubViewportContainer/GameViewport"]
+layer = 100
+
+[node name="DitherRect" type="ColorRect" parent="SubViewportContainer/GameViewport/DitherLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("ShaderMaterial_dither")
+
+[node name="NativeHUD" parent="." instance=ExtResource("3_native_hud")]
+
+[node name="PauseMenu" parent="." instance=ExtResource("5_pause_menu")]

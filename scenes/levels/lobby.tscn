@@ -1,0 +1,50 @@
+[gd_scene load_steps=4 format=3 uid="uid://lobby01scene"]
+
+[ext_resource type="Script" path="res://scripts/levels/part1_level.gd" id="1_lobby"]
+[ext_resource type="PackedScene" uid="uid://d4player01scene" path="res://scenes/player/player.tscn" id="2_player"]
+
+[sub_resource type="Environment" id="Environment_lobby"]
+background_mode = 1
+background_color = Color(0.01, 0.01, 0.02, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.12, 0.13, 0.17, 1)
+ambient_light_energy = 0.07
+tonemap_mode = 0
+fog_enabled = true
+fog_light_color = Color(0.16, 0.17, 0.2, 1)
+fog_light_energy = 1.0
+fog_sun_scatter = 0.0
+fog_density = 0.012
+fog_aerial_perspective = 0.0
+fog_height = 0.0
+fog_height_density = 0.0
+
+[node name="Lobby" type="Node3D"]
+script = ExtResource("1_lobby")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_lobby")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 4, 6, 2)
+light_color = Color(0.40, 0.45, 0.58, 1)
+light_energy = 0.04
+shadow_enabled = false
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -1.5)
+light_color = Color(0.95, 0.85, 0.65, 1)
+light_energy = 0.0
+omni_range = 9.0
+
+[node name="OmniLight3D_Entrance" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 4.5)
+light_color = Color(0.75, 0.78, 0.82, 1)
+light_energy = 0.0
+omni_range = 6.0
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.2)
+
+[node name="SpawnMarker" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.2)

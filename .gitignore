@@ -1,0 +1,34 @@
+# Godot 4+
+.godot/
+export.cfg
+export_credentials.cfg
+*.translation
+
+# Mono-specific
+.mono/
+data_*/
+mono_crash.*.json
+
+# Android
+/android/
+
+# Export builds
+/build/
+/export/
+*.exe
+*.pck
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Logs
+*.log

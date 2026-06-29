@@ -1,0 +1,102 @@
+[gd_scene format=3 uid="uid://oxiqxcmhc6r0"]
+
+[ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="1_script"]
+[ext_resource type="Shader" path="res://shaders/scanlines.gdshader" id="2_scanline"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_scan"]
+shader = ExtResource("2_scanline")
+shader_parameter/line_opacity = 0.08
+shader_parameter/line_spacing = 3.0
+
+[node name="PauseMenu" type="CanvasLayer"]
+layer = 20
+process_mode = 3
+script = ExtResource("1_script")
+
+[node name="Panel" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Dimmer" type="ColorRect" parent="Panel"]
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.01, 0.01, 0.02, 0.82)
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.68, 0.6, 0.9)
+theme_override_font_sizes/font_size = 28
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="Sep" type="Control" parent="Panel/VBox"]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="BtnResume" type="Button" parent="Panel/VBox"]
+custom_minimum_size = Vector2(220, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.88, 0.86, 0.78, 1)
+theme_override_colors/font_hover_color = Color(1, 0.95, 0.85, 1)
+theme_override_colors/font_focus_color = Color(1, 0.35, 0.28, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.2, 0.15, 1)
+theme_override_font_sizes/font_size = 16
+text = "RESUME"
+flat = true
+
+[node name="BtnSave" type="Button" parent="Panel/VBox"]
+custom_minimum_size = Vector2(220, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.88, 0.86, 0.78, 1)
+theme_override_colors/font_hover_color = Color(1, 0.95, 0.85, 1)
+theme_override_colors/font_focus_color = Color(1, 0.35, 0.28, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.2, 0.15, 1)
+theme_override_font_sizes/font_size = 16
+text = "SAVE GAME"
+flat = true
+
+[node name="BtnMenu" type="Button" parent="Panel/VBox"]
+custom_minimum_size = Vector2(220, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.88, 0.86, 0.78, 1)
+theme_override_colors/font_hover_color = Color(1, 0.95, 0.85, 1)
+theme_override_colors/font_focus_color = Color(1, 0.35, 0.28, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.2, 0.15, 1)
+theme_override_font_sizes/font_size = 16
+text = "MAIN MENU"
+flat = true
+
+[node name="BtnQuit" type="Button" parent="Panel/VBox"]
+custom_minimum_size = Vector2(220, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.6, 0.58, 0.52, 1)
+theme_override_colors/font_hover_color = Color(0.88, 0.84, 0.74, 1)
+theme_override_colors/font_focus_color = Color(1, 0.35, 0.28, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.2, 0.15, 1)
+theme_override_font_sizes/font_size = 16
+text = "QUIT"
+flat = true
+
+[node name="Scanlines" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("ShaderMaterial_scan")

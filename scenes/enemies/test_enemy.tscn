@@ -1,0 +1,39 @@
+[gd_scene load_steps=5 format=3 uid="uid://testenemy01"]
+
+[ext_resource type="Script" path="res://scripts/enemies/enemy_ai.gd" id="1_enemy"]
+[ext_resource type="Script" path="res://scripts/combat/health_component.gd" id="2_health"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_enemy"]
+radius = 0.5
+height = 1.8
+
+[sub_resource type="QuadMesh" id="QuadMesh_enemy"]
+size = Vector2(2.2, 2.05)
+
+[node name="TestEnemy" type="CharacterBody3D"]
+script = ExtResource("1_enemy")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape_enemy")
+
+[node name="MeshPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="MeshPivot"]
+mesh = SubResource("QuadMesh_enemy")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("2_health")
+max_health = 80.0
+
+[node name="PatrolPoints" type="Node3D" parent="."]
+
+[node name="PointA" type="Marker3D" parent="PatrolPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.0, 0, 0)
+
+[node name="PointB" type="Marker3D" parent="PatrolPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.0, 0, -0.8)
+
+[node name="PointC" type="Marker3D" parent="PatrolPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0, 0, 0.5)

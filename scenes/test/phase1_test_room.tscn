@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=3 uid="uid://bqx7phase1room"]
+
+[ext_resource type="Script" path="res://scripts/phase1_test_room.gd" id="1_room"]
+[ext_resource type="PackedScene" uid="uid://d4player01scene" path="res://scenes/player/player.tscn" id="2_player"]
+
+[sub_resource type="Environment" id="Environment_psx"]
+background_mode = 1
+background_color = Color(0.02, 0.02, 0.05, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.15, 0.14, 0.18, 1)
+ambient_light_energy = 0.4
+tonemap_mode = 0
+fog_enabled = true
+fog_light_color = Color(0.04, 0.04, 0.07, 1)
+fog_density = 0.035
+
+[node name="Phase1TestRoom" type="Node3D"]
+script = ExtResource("1_room")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_psx")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 2, 4, 2)
+light_color = Color(0.75, 0.72, 0.65, 1)
+light_energy = 0.6
+shadow_enabled = true
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1.8, -1.0)
+light_color = Color(0.9, 0.45, 0.25, 1)
+light_energy = 0.35
+omni_range = 5.0
+
+[node name="Player" parent="." instance=ExtResource("2_player")]

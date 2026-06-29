@@ -1,0 +1,56 @@
+[gd_scene load_steps=7 format=3 uid="uid://d4player01scene"]
+
+[ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1_player"]
+[ext_resource type="Script" path="res://scripts/interaction/interaction_component.gd" id="2_interact"]
+[ext_resource type="Script" path="res://scripts/player/flashlight.gd" id="3_flash"]
+[ext_resource type="Script" path="res://scripts/combat/combat_component.gd" id="4_combat"]
+[ext_resource type="PackedScene" uid="uid://invui01panel" path="res://scenes/ui/inventory_ui.tscn" id="5_inv"]
+[ext_resource type="PackedScene" uid="uid://noteui01read" path="res://scenes/ui/note_reader_ui.tscn" id="6_note"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
+radius = 0.35
+height = 1.4
+
+[node name="Player" type="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.5)
+script = ExtResource("1_player")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+shape = SubResource("CapsuleShape_player")
+
+[node name="Head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Head"]
+current = true
+fov = 75.0
+near = 0.1
+far = 80.0
+
+[node name="InteractionRay" type="RayCast3D" parent="Head/Camera3D"]
+target_position = Vector3(0, 0, -3.4)
+collision_mask = 1
+
+[node name="Flashlight" type="Node3D" parent="Head"]
+script = ExtResource("3_flash")
+
+[node name="SpotLight3D" type="SpotLight3D" parent="Head/Flashlight"]
+light_color = Color(0.95, 0.9, 0.78, 1)
+light_energy = 4.2
+light_specular = 0.0
+spot_range = 16.0
+spot_attenuation = 1.5
+spot_angle = 36.0
+spot_angle_attenuation = 1.0
+shadow_enabled = true
+
+[node name="InteractionComponent" type="Node" parent="."]
+script = ExtResource("2_interact")
+
+[node name="CombatComponent" type="Node" parent="."]
+script = ExtResource("4_combat")
+
+[node name="InventoryUI" parent="." instance=ExtResource("5_inv")]
+
+[node name="NoteReaderUI" parent="." instance=ExtResource("6_note")]

@@ -1,0 +1,134 @@
+[gd_scene format=3 uid="uid://oa1t7v4cf3jn"]
+
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_script"]
+[ext_resource type="Shader" path="res://shaders/scanlines.gdshader" id="2_scanline"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_scan"]
+shader = ExtResource("2_scanline")
+shader_parameter/line_opacity = 0.1
+shader_parameter/line_spacing = 3.0
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="BgColor" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.02, 0.03, 1)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -140.0
+offset_right = 180.0
+offset_bottom = 140.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="Spacer" type="Control" parent="VBox"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.12, 0.1, 1)
+theme_override_font_sizes/font_size = 42
+text = "HOLLOWED"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.48, 0.42, 0.8)
+theme_override_font_sizes/font_size = 14
+text = "A thing born from silence."
+horizontal_alignment = 1
+
+[node name="BtnSpacer" type="Control" parent="VBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+
+[node name="BtnStart" type="Button" parent="VBox"]
+custom_minimum_size = Vector2(200, 38)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.88, 0.86, 0.78, 1)
+theme_override_colors/font_hover_color = Color(1, 0.95, 0.85, 1)
+theme_override_colors/font_focus_color = Color(1, 0.35, 0.28, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.2, 0.15, 1)
+theme_override_font_sizes/font_size = 18
+text = "NEW GAME"
+flat = true
+
+[node name="BtnContinue" type="Button" parent="VBox"]
+custom_minimum_size = Vector2(200, 38)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.88, 0.86, 0.78, 1)
+theme_override_colors/font_hover_color = Color(1, 0.95, 0.85, 1)
+theme_override_colors/font_focus_color = Color(1, 0.35, 0.28, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.2, 0.15, 1)
+theme_override_font_sizes/font_size = 18
+text = "CONTINUE"
+flat = true
+
+[node name="BtnQuit" type="Button" parent="VBox"]
+custom_minimum_size = Vector2(200, 38)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.6, 0.58, 0.52, 1)
+theme_override_colors/font_hover_color = Color(0.88, 0.84, 0.74, 1)
+theme_override_colors/font_focus_color = Color(1, 0.35, 0.28, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.2, 0.15, 1)
+theme_override_font_sizes/font_size = 18
+text = "QUIT"
+flat = true
+
+[node name="Scanlines" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("ShaderMaterial_scan")
+
+[node name="VersionLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -28.0
+offset_right = -12.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.35, 0.33, 0.3, 0.6)
+theme_override_font_sizes/font_size = 11
+text = "v0.1 — Part I"
+horizontal_alignment = 2
+
+[node name="FlickerTimer" type="Timer" parent="."]
+wait_time = 0.08
+autostart = true

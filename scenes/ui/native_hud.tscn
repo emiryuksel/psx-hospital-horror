@@ -1,0 +1,247 @@
+[gd_scene format=3 uid="uid://nativehud01"]
+
+[ext_resource type="Script" path="res://scripts/ui/native_hud.gd" id="1_hud"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stats"]
+bg_color = Color(0.05, 0.05, 0.07, 0.72)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gameover"]
+bg_color = Color(0.04, 0.02, 0.03, 0.88)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_right = 0
+corner_radius_bottom_left = 0
+
+[node name="NativeHUD" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_hud")
+
+[node name="StatsPanel" type="PanelContainer" parent="."]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -104.0
+offset_right = 220.0
+offset_bottom = -12.0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_stats")
+
+[node name="Margin" type="MarginContainer" parent="StatsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="VBox" type="VBoxContainer" parent="StatsPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="HealthRow" type="HBoxContainer" parent="StatsPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="StaminaRow" type="HBoxContainer" parent="StatsPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="BatteryRow" type="HBoxContainer" parent="StatsPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Crosshair" type="Label" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 14.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.78, 0.85)
+theme_override_font_sizes/font_size = 20
+text = "·"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WeaponPanel" type="PanelContainer" parent="."]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -148.0
+offset_top = -64.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_stats")
+
+[node name="Margin" type="MarginContainer" parent="WeaponPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="VBox" type="VBoxContainer" parent="WeaponPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="WeaponLabel" type="Label" parent="WeaponPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.86, 0.84, 0.74, 1)
+theme_override_font_sizes/font_size = 13
+text = "PISTOL"
+horizontal_alignment = 2
+
+[node name="AmmoLabel" type="Label" parent="WeaponPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.78, 0.42, 1)
+theme_override_font_sizes/font_size = 20
+text = "6 / 0"
+horizontal_alignment = 2
+
+[node name="ReloadBar" type="ProgressBar" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -70.0
+offset_top = -80.0
+offset_right = 70.0
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+max_value = 100.0
+show_percentage = false
+
+[node name="PromptLabel" type="Label" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -52.0
+offset_right = 220.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.92, 0.9, 0.78, 1)
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+
+[node name="ObjectiveLabel" type="Label" parent="."]
+offset_left = 14.0
+offset_top = 12.0
+offset_right = 360.0
+offset_bottom = 36.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.88, 0.86, 0.76, 0.92)
+theme_override_font_sizes/font_size = 13
+text = "Part I — Find the generator fuse"
+horizontal_alignment = 0
+autowrap_mode = 2
+
+[node name="InnerVoicePanel" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -360.0
+offset_top = -148.0
+offset_right = 360.0
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="InnerVoicePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="InnerVoiceLabel" type="Label" parent="InnerVoicePanel/Margin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.76, 0.72, 0.95)
+theme_override_font_sizes/font_size = 14
+text = "..."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="GameOverPanel" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_gameover")
+
+[node name="Center" type="CenterContainer" parent="GameOverPanel"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="GameOverPanel/Center"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Title" type="Label" parent="GameOverPanel/Center/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.86, 0.8, 1)
+theme_override_font_sizes/font_size = 28
+text = "CONSUMED BY DARKNESS"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Hint" type="Label" parent="GameOverPanel/Center/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.58, 0.52, 1)
+theme_override_font_sizes/font_size = 14
+text = "The mist claimed you."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="BtnLoadSave" type="Button" parent="GameOverPanel/Center/VBox"]
+custom_minimum_size = Vector2(240, 38)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.88, 0.86, 0.78, 1)
+theme_override_colors/font_hover_color = Color(1, 0.95, 0.85, 1)
+theme_override_colors/font_focus_color = Color(1, 0.35, 0.28, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.2, 0.15, 1)
+theme_override_font_sizes/font_size = 18
+text = "LOAD LAST SAVE"
+flat = true
+
+[node name="BtnRetry" type="Button" parent="GameOverPanel/Center/VBox"]
+custom_minimum_size = Vector2(240, 38)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.7, 0.68, 0.62, 1)
+theme_override_colors/font_hover_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_colors/font_focus_color = Color(1, 0.35, 0.28, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.2, 0.15, 1)
+theme_override_font_sizes/font_size = 16
+text = "RETRY"
+flat = true
