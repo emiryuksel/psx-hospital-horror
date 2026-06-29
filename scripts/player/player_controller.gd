@@ -49,6 +49,7 @@ var _bob_timer: float = 0.0
 var _base_head_y: float = 0.0
 var _capsule_stand_height: float = 1.4
 var _is_dead: bool = false
+var _input_locked: bool = false
 var _wake_triggered: bool = false
 var _step_distance: float = 0.0
 var _shake_strength: float = 0.0
@@ -62,7 +63,11 @@ func _ready() -> void:
 	_base_head_y = head.position.y
 	if _capsule:
 		_capsule_stand_height = _capsule.height
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	if GameSession.intro_pending:
+		_input_locked = true
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	else:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 	_interaction.focus_changed.connect(_on_focus_changed)
 	_flashlight.battery_changed.connect(func(c, m): HudManager.update_battery(c, m))
@@ -76,8 +81,15 @@ func _sync_hud() -> void:
 	HudManager.update_battery(_flashlight.battery, _flashlight.max_battery)
 
 
+func set_input_locked(locked: bool) -> void:
+	_input_locked = locked
+	if locked:
+		velocity = Vector3.ZERO
+		_smoothed_velocity = Vector3.ZERO
+
+
 func _input(event: InputEvent) -> void:
-	if _is_dead or InventoryManager.is_open:
+	if _input_locked or _is_dead or InventoryManager.is_open:
 		return
 
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -89,7 +101,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _is_dead:
+	if _input_locked or _is_dead:
 		return
 
 	if event.is_action_pressed("inventory"):
@@ -102,7 +114,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if _is_dead or InventoryManager.is_open:
+	if _input_locked or _is_dead or InventoryManager.is_open:
 		velocity = Vector3.ZERO
 		return
 

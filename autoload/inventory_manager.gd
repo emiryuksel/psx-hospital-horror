@@ -26,6 +26,12 @@ func _reset_slots() -> void:
 		slots.append(null)
 
 
+func reset_for_new_game() -> void:
+	_reset_slots()
+	is_open = false
+	inventory_changed.emit()
+
+
 func toggle_inventory() -> void:
 	is_open = not is_open
 	inventory_toggled.emit(is_open)

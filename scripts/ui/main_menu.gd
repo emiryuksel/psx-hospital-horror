@@ -32,6 +32,7 @@ func _ready() -> void:
 
 func _on_start() -> void:
 	AudioManager.play("ui_paper", -4.0)
+	GameSession.request_new_game_intro()
 	get_tree().change_scene_to_file(GAME_SCENE)
 
 

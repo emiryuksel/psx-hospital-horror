@@ -92,7 +92,7 @@ func _grant_pistol() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if InventoryManager.is_open:
+	if GameSession.intro_active or GameSession.intro_pending or InventoryManager.is_open:
 		return
 
 	if _player.has_method("is_dead") and _player.is_dead():

@@ -1,0 +1,76 @@
+[gd_scene format=3 uid="uid://buunjlvi7ttie"]
+
+[ext_resource type="Script" path="res://scripts/ui/studio_splash.gd" id="1_script"]
+[ext_resource type="Shader" path="res://shaders/scanlines.gdshader" id="2_scanline"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_scan"]
+shader = ExtResource("2_scanline")
+shader_parameter/line_opacity = 0.09
+shader_parameter/line_spacing = 3.0
+
+[node name="StudioSplash" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="BgColor" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.02, 0.03, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CreditsVBox" type="VBoxContainer" parent="Center"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="CreatedByLabel" type="Label" parent="Center/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.56, 0.5, 0.9)
+theme_override_font_sizes/font_size = 15
+text = "Created By"
+horizontal_alignment = 1
+
+[node name="AuthorLabel" type="Label" parent="Center/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 30
+text = "Emir Yüksel"
+horizontal_alignment = 1
+
+[node name="Scanlines" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("ShaderMaterial_scan")
+
+[node name="FadeLayer" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)

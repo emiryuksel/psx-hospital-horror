@@ -1,5 +1,5 @@
 # Part I — Lobby + Patient Wing + Utility Closet
-# Görev: sigortayı bul, lobby breaker paneline tak, ilk düşmanla karşılaş.
+# Görev: sigortayı bul (koridor jumpscare), lobby breaker'a tak (tek zombi pusu).
 extends Node3D
 
 const GENERATED_GROUP := "generated_part1"
@@ -85,8 +85,13 @@ func _ready() -> void:
 			_on_power_restored()
 		else:
 			_apply_low_power_lighting()
+		_fuse_pickup_creature_spawned = QuestManager.fuse_pickup_creature_done
+		_fuse_install_creature_spawned = QuestManager.fuse_ambush_done
 		QuestManager.refresh_objective()
-		AudioManager.start_ambient("ambient_drone", -16.0)
+		if GameSession.intro_pending:
+			GameSession.intro_completed.connect(_start_ambient_drone, CONNECT_ONE_SHOT)
+		else:
+			_start_ambient_drone()
 		call_deferred("_try_apply_save")
 
 
@@ -95,8 +100,14 @@ func _try_apply_save() -> void:
 		return
 	await get_tree().process_frame
 	SaveManager.apply_to_current_scene()
+	_fuse_pickup_creature_spawned = QuestManager.fuse_pickup_creature_done
+	_fuse_install_creature_spawned = QuestManager.fuse_ambush_done
 	if QuestManager.power_on:
 		_on_power_restored()
+
+
+func _start_ambient_drone() -> void:
+	AudioManager.start_ambient("ambient_drone", -16.0)
 
 
 func _input(event: InputEvent) -> void:
@@ -136,6 +147,8 @@ func _on_power_restored() -> void:
 	for light in _power_lights:
 		if is_instance_valid(light):
 			light.visible = true
+	if QuestManager.consume_fuse_ambush():
+		call_deferred("spawn_fuse_install_creature")
 
 
 func _apply_low_power_lighting() -> void:
@@ -821,7 +834,8 @@ func _build_enemies() -> void:
 	pass
 
 
-var _creature_spawned: bool = false
+var _fuse_pickup_creature_spawned: bool = false
+var _fuse_install_creature_spawned: bool = false
 
 
 func _on_item_picked_up(item: Item, _slot_index: int, _count: int) -> void:
@@ -835,21 +849,21 @@ func _on_item_picked_up(item: Item, _slot_index: int, _count: int) -> void:
 		return
 	if item.id != "generator_fuse":
 		return
-	if _creature_spawned:
+	if _fuse_pickup_creature_spawned or QuestManager.fuse_pickup_creature_done:
 		return
-	_creature_spawned = true
+	_fuse_pickup_creature_spawned = true
+	QuestManager.mark_fuse_pickup_creature_done()
 	InnerVoiceManager.trigger("first_enemy")
-	call_deferred("spawn_fuse_creature")
+	call_deferred("spawn_fuse_pickup_creature")
 
 
-# Fuse alındığında çağrılır — canavar koridorun karanlık ucundan gelir
-func spawn_fuse_creature() -> void:
+# Fuse alındığında — koridorun karanlık ucundan tek zombi + jumpscare.
+func spawn_fuse_pickup_creature() -> void:
 	if Engine.is_editor_hint():
 		return
 	var enemy_scene: PackedScene = load("res://scenes/enemies/test_enemy.tscn")
 	var enemy: EnemyAI = enemy_scene.instantiate() as EnemyAI
 	enemy.name = "MistCrawler"
-	# Koridorun kuzey ucuna spawn — karanlıktan çıksın
 	enemy.position = Vector3(0.0, 0.0, _corridor_center_z - CORRIDOR_LENGTH * 0.4)
 	enemy.detection_range = 24.0
 	enemy.patrol_speed = 0.0
@@ -864,9 +878,8 @@ func spawn_fuse_creature() -> void:
 
 	AudioManager.play("enemy_alert", 2.0)
 	AudioManager.play_3d("enemy_growl", enemy.global_position, 0.0, 0.85, 0.95)
-	call_deferred("_play_creature_jumpscare")
+	call_deferred("_play_creature_jumpscare", 1.15)
 
-	# 12 saniye sonra canavar kaybolsun — oyuncu kaçtıysa sağ kurtulur
 	var tween := create_tween()
 	tween.tween_interval(12.0)
 	tween.tween_callback(func() -> void:
@@ -876,11 +889,60 @@ func spawn_fuse_creature() -> void:
 	)
 
 
-func _play_creature_jumpscare() -> void:
-	HudManager.play_jumpscare(1.15)
+# Fuse takıldığında — oyuncunun önünde tek zombi belirir.
+func spawn_fuse_install_creature() -> void:
+	if Engine.is_editor_hint() or _fuse_install_creature_spawned:
+		return
+	_fuse_install_creature_spawned = true
+	QuestManager.mark_fuse_ambush_done()
+
+	var player := get_tree().get_first_node_in_group("player") as CharacterBody3D
+	var spawn_pos := Vector3(0.0, 0.0, _corridor_center_z - CORRIDOR_LENGTH * 0.4)
+	if player:
+		var fwd := -player.global_transform.basis.z
+		fwd.y = 0.0
+		if fwd.length_squared() > 0.01:
+			spawn_pos = player.global_position + fwd.normalized() * 2.2
+
+	var enemy := _spawn_ambush_enemy("MistCrawlerInstall", spawn_pos)
+	_play_creature_jumpscare(1.25)
+	AudioManager.play("enemy_alert", 2.0, 0.9, 1.0)
+	AudioManager.play_3d("enemy_growl", enemy.global_position, -1.0, 0.85, 0.95)
+
+	var tween := create_tween()
+	tween.tween_interval(15.0)
+	tween.tween_callback(func() -> void:
+		if is_instance_valid(enemy):
+			AudioManager.play_3d("enemy_death", enemy.global_position, -2.0, 0.8, 0.9)
+			enemy.queue_free()
+	)
+
+
+func _spawn_ambush_enemy(enemy_name: String, spawn_pos: Vector3) -> EnemyAI:
+	var enemy_scene: PackedScene = load("res://scenes/enemies/test_enemy.tscn")
+	var enemy: EnemyAI = enemy_scene.instantiate() as EnemyAI
+	enemy.name = enemy_name
+	enemy.position = spawn_pos
+	enemy.detection_range = 28.0
+	enemy.patrol_speed = 0.0
+	enemy.chase_speed = 6.8
+	enemy.attack_damage = 34.0
+	enemy.use_contact_damage = true
+	enemy.contact_range = 1.2
+	enemy.contact_damage_cooldown = 0.6
+	enemy.start_state = EnemyAI.State.CHASE
+	enemy.add_to_group(GENERATED_GROUP)
+	add_child(enemy)
+	AudioManager.play_3d("enemy_growl", enemy.global_position, -2.0, 0.85, 0.95)
+	return enemy
+
+
+func _play_creature_jumpscare(intensity: float = 1.15) -> void:
+	HudManager.play_jumpscare(intensity)
 	var player := get_tree().get_first_node_in_group("player")
 	if player and player.has_method("play_camera_shake"):
-		player.play_camera_shake(0.2, 0.4)
+		var shake := 0.2 if intensity < 1.3 else 0.32 * intensity
+		player.play_camera_shake(shake, 0.45 if intensity < 1.3 else 0.55)
 
 
 func _add_solid_box(

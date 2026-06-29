@@ -75,6 +75,16 @@ func play_varied(names: Array, volume_db: float = 0.0, pitch_min: float = 0.95, 
 	play(names[_rng.randi() % names.size()], volume_db, pitch_min, pitch_max)
 
 
+func play_chapter_sting() -> void:
+	# Bolum basligi — sabit pitch, tam guc (kalin nota).
+	play("chapter_sting", 1.0, 1.0, 1.0)
+
+
+func play_pickup(volume_db: float = -2.0) -> void:
+	# Esya alma — kalin nota, sabit pitch.
+	play("pickup", volume_db, 1.0, 1.0)
+
+
 func play_3d(sound_name: String, pos: Vector3, volume_db: float = 0.0, pitch_min: float = 1.0, pitch_max: float = 1.0, max_dist: float = 24.0) -> void:
 	var s := _get_stream(sound_name)
 	if s == null:
@@ -164,7 +174,7 @@ func _apply_loop(s: AudioStream) -> void:
 # ---------------- Signal handlers ----------------
 
 func _on_item_added(_item: Item, _slot_index: int, _count: int) -> void:
-	play("pickup", -3.0, 0.97, 1.03)
+	play_pickup()
 
 
 func _on_note_requested(_text: String, _title: String) -> void:
@@ -183,7 +193,7 @@ func _on_heal_requested(_amount: float) -> void:
 
 
 func _on_combine_succeeded(_result_item: Item) -> void:
-	play("pickup", -2.0, 1.05, 1.1)
+	play_pickup()
 
 
 func _on_power_restored() -> void:

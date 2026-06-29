@@ -23,6 +23,8 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if GameSession.intro_active or GameSession.intro_pending:
+		return
 	if event.is_action_pressed("ui_cancel"):
 		# Not okuyucu acikken pause acma — onun kendi _input'u kapatir.
 		var reader := get_tree().get_first_node_in_group("note_reader")
@@ -36,7 +38,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _pause() -> void:
-	if InventoryManager.is_open:
+	if GameSession.intro_active or GameSession.intro_pending or InventoryManager.is_open:
 		return
 	_is_paused = true
 	get_tree().paused = true

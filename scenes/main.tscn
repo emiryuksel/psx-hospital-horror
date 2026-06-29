@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://c8k2psxmain01"]
+[gd_scene load_steps=8 format=3 uid="uid://c8k2psxmain01"]
 
 [ext_resource type="Script" path="res://scripts/psx_viewport_setup.gd" id="1_setup"]
 [ext_resource type="PackedScene" uid="uid://lobby01scene" path="res://scenes/levels/lobby.tscn" id="2_room"]
 [ext_resource type="PackedScene" uid="uid://nativehud01" path="res://scenes/ui/native_hud.tscn" id="3_native_hud"]
 [ext_resource type="Shader" path="res://shaders/psx_dither.gdshader" id="4_dither_shader"]
 [ext_resource type="PackedScene" uid="uid://pausemenu01psx" path="res://scenes/ui/pause_menu.tscn" id="5_pause_menu"]
+[ext_resource type="PackedScene" uid="uid://gameintro01psx" path="res://scenes/ui/game_intro.tscn" id="6_game_intro"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dither"]
 shader = ExtResource("4_dither_shader")
@@ -65,3 +66,5 @@ material = SubResource("ShaderMaterial_dither")
 [node name="NativeHUD" parent="." instance=ExtResource("3_native_hud")]
 
 [node name="PauseMenu" parent="." instance=ExtResource("5_pause_menu")]
+
+[node name="GameIntro" parent="." instance=ExtResource("6_game_intro")]

@@ -44,6 +44,7 @@ func save_game() -> bool:
 		return false
 
 	_show_message("Game saved")
+	AudioManager.play_pickup(-6.0)
 	save_completed.emit(true)
 	return true
 

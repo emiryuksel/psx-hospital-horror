@@ -31,12 +31,48 @@ func _ready() -> void:
 	_apply_settings_from_autoload()
 	PsxSettings.settings_changed.connect(_apply_settings_from_autoload)
 
-	if SaveManager.consume_load_request():
+	var is_continue := SaveManager.consume_load_request()
+	if GameSession.consume_new_game_intro():
+		call_deferred("_start_new_game_intro")
+	elif is_continue:
 		call_deferred("_deferred_load")
 
 
 func _deferred_load() -> void:
 	SaveManager.load_game()
+
+
+func _start_new_game_intro() -> void:
+	GameSession.intro_active = true
+	InventoryManager.reset_for_new_game()
+	InnerVoiceManager.reset_for_new_game()
+	QuestManager.reset_part1()
+	HudManager.set_gameplay_hud_visible(false)
+	_set_player_input_locked(true)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+	var intro: CanvasLayer = get_node_or_null("GameIntro")
+	if intro == null or not intro.has_method("play"):
+		_on_intro_finished()
+		return
+
+	if not intro.finished.is_connected(_on_intro_finished):
+		intro.finished.connect(_on_intro_finished, CONNECT_ONE_SHOT)
+	intro.play()
+
+
+func _on_intro_finished() -> void:
+	GameSession.finish_intro()
+	HudManager.set_gameplay_hud_visible(true)
+	_set_player_input_locked(false)
+	QuestManager.complete_intro()
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+func _set_player_input_locked(locked: bool) -> void:
+	var player := get_tree().get_first_node_in_group("player")
+	if player and player.has_method("set_input_locked"):
+		player.set_input_locked(locked)
 
 
 func _apply_settings_from_autoload() -> void:

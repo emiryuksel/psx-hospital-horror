@@ -93,6 +93,14 @@ func apply_save_data(data: Dictionary) -> void:
 		_fired[str(trigger_id)] = true
 
 
+func reset_for_new_game() -> void:
+	_fired.clear()
+	if _active_tween and is_instance_valid(_active_tween):
+		_active_tween.kill()
+		_active_tween = null
+	HudManager.hide_inner_voice()
+
+
 func _show_line(text: String) -> void:
 	if _active_tween and is_instance_valid(_active_tween):
 		_active_tween.kill()

@@ -14,9 +14,11 @@ extends CanvasLayer
 @onready var _health_row: HBoxContainer = $StatsPanel/Margin/VBox/HealthRow
 @onready var _stamina_row: HBoxContainer = $StatsPanel/Margin/VBox/StaminaRow
 @onready var _battery_row: HBoxContainer = $StatsPanel/Margin/VBox/BatteryRow
+@onready var _stats_panel: PanelContainer = $StatsPanel
 @onready var _inner_voice_panel: PanelContainer = $InnerVoicePanel
 @onready var _inner_voice_label: Label = $InnerVoicePanel/Margin/InnerVoiceLabel
-@onready var _objective_label: Label = $ObjectiveLabel
+@onready var _objective_panel: PanelContainer = $ObjectivePanel
+@onready var _objective_label: Label = $ObjectivePanel/Margin/ObjectiveLabel
 
 const WEAPON_IDLE_TEX := "res://assets/textures/weapons/pistol_idle.png"
 const WEAPON_FIRE_TEX := "res://assets/textures/weapons/pistol_fire.png"
@@ -56,6 +58,8 @@ var _fire_tween: Tween = null
 var _damage_tween: Tween = null
 var _low_health: bool = false
 var _weapon_anim_lock: bool = false
+var _objective_tween: Tween = null
+const _OBJECTIVE_REST_X := 10.0
 
 
 func _ready() -> void:
@@ -63,19 +67,40 @@ func _ready() -> void:
 	_build_stat_icons()
 	_build_weapon_viewmodel()
 	_build_damage_overlay()
-	_set_mouse_ignore(self)
+	_set_mouse_ignore(self, _game_over_panel)
+	_configure_game_over_mouse()
 	hide_prompt()
 	_inner_voice_panel.visible = false
 	_reload_bar.visible = false
 	_game_over_panel.visible = false
+	if _objective_panel:
+		_objective_panel.visible = false
 	if _game_over_load_btn:
 		_game_over_load_btn.pressed.connect(_on_game_over_load_save)
 	if _game_over_retry_btn:
 		_game_over_retry_btn.pressed.connect(_on_game_over_retry)
 	_weapon_panel.visible = false
 	update_weapon_label(1)
+	if GameSession.intro_pending:
+		set_gameplay_hud_visible(false)
 	call_deferred("_sync_initial_values")
 	call_deferred("_sync_objective")
+
+
+func set_gameplay_hud_visible(visible: bool) -> void:
+	if _stats_panel:
+		_stats_panel.visible = visible
+	_crosshair.visible = visible
+	_weapon_panel.visible = visible and _weapon_visible
+	_reload_bar.visible = false
+	if not visible:
+		hide_prompt()
+		if _objective_panel:
+			_objective_panel.visible = false
+		if _inner_voice_panel:
+			_inner_voice_panel.visible = false
+	elif _objective_label and not _objective_label.text.is_empty() and _objective_panel:
+		_objective_panel.visible = true
 
 
 # Sol-altta piksel gosterge ikonlari: kalpler (can), simsekler (stamina), pil (flashlight)
@@ -365,6 +390,10 @@ func play_jumpscare(intensity: float = 1.0) -> void:
 		_vignette_overlay.modulate.a = clampf(0.45 * intensity, 0.25, 0.65)
 
 	_damage_tween = create_tween()
+	if intensity >= 1.4:
+		_damage_tween.tween_property(_damage_overlay, "color:a", peak, 0.05)
+		_damage_tween.tween_property(_damage_overlay, "color:a", peak * 0.25, 0.07)
+		_damage_tween.tween_property(_damage_overlay, "color:a", peak * 0.92, 0.05)
 	_damage_tween.tween_property(_damage_overlay, "color:a", rest_alpha, 0.42).set_ease(Tween.EASE_OUT)
 	if _vignette_overlay:
 		_damage_tween.parallel().tween_property(_vignette_overlay, "modulate:a", vig_rest, 0.48)
@@ -395,11 +424,35 @@ func _sync_objective() -> void:
 	update_objective(QuestManager.get_objective_text())
 
 
-func _set_mouse_ignore(node: Node) -> void:
+func _set_mouse_ignore(node: Node, skip_root: Node = null) -> void:
+	if _is_under_mouse_skip_root(node, skip_root):
+		return
 	if node is Control:
 		(node as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for child in node.get_children():
-		_set_mouse_ignore(child)
+		_set_mouse_ignore(child, skip_root)
+
+
+func _is_under_mouse_skip_root(node: Node, skip_root: Node) -> bool:
+	if skip_root == null:
+		return false
+	var current: Node = node
+	while current:
+		if current == skip_root:
+			return true
+		current = current.get_parent()
+	return false
+
+
+func _configure_game_over_mouse() -> void:
+	if _game_over_panel:
+		_game_over_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	if _game_over_load_btn:
+		_game_over_load_btn.mouse_filter = Control.MOUSE_FILTER_STOP
+		_game_over_load_btn.focus_mode = Control.FOCUS_ALL
+	if _game_over_retry_btn:
+		_game_over_retry_btn.mouse_filter = Control.MOUSE_FILTER_STOP
+		_game_over_retry_btn.focus_mode = Control.FOCUS_ALL
 
 
 func _sync_initial_values() -> void:
@@ -472,6 +525,9 @@ func hide_reload_progress() -> void:
 
 
 func show_game_over() -> void:
+	_configure_game_over_mouse()
+	if _game_over_panel.get_index() < get_child_count() - 1:
+		move_child(_game_over_panel, -1)
 	_game_over_panel.visible = true
 	_crosshair.visible = false
 	hide_prompt()
@@ -483,6 +539,8 @@ func show_game_over() -> void:
 		_weapon_panel.visible = false
 	if _objective_label:
 		_objective_label.visible = false
+	if _objective_panel:
+		_objective_panel.visible = false
 
 	var has_save := SaveManager.has_save()
 	if _game_over_load_btn:
@@ -503,6 +561,8 @@ func show_game_over() -> void:
 func hide_game_over() -> void:
 	_game_over_panel.visible = false
 	_crosshair.visible = true
+	if _objective_panel:
+		_objective_panel.visible = true
 	if _objective_label:
 		_objective_label.visible = true
 
@@ -573,6 +633,33 @@ func hide_inner_voice() -> void:
 	_inner_voice_panel.visible = false
 
 
-func update_objective(text: String) -> void:
+func update_objective(text: String, animated: bool = false) -> void:
+	if _objective_tween and is_instance_valid(_objective_tween):
+		_objective_tween.kill()
+
 	_objective_label.text = text
-	_objective_label.visible = not text.is_empty()
+	if _objective_panel:
+		_objective_panel.reset_size()
+	if text.is_empty():
+		if _objective_panel:
+			_objective_panel.visible = false
+		return
+
+	if _objective_panel:
+		_objective_panel.visible = true
+
+	if not animated:
+		if _objective_panel:
+			_objective_panel.modulate.a = 1.0
+			_objective_panel.position.x = _OBJECTIVE_REST_X
+		return
+
+	if _objective_panel:
+		_objective_panel.modulate.a = 0.0
+		_objective_panel.position.x = _OBJECTIVE_REST_X - 48.0
+	_objective_tween = create_tween()
+	_objective_tween.set_parallel(true)
+	_objective_tween.tween_property(_objective_panel, "modulate:a", 1.0, 0.38)
+	_objective_tween.tween_property(
+		_objective_panel, "position:x", _OBJECTIVE_REST_X, 0.42
+	).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)

@@ -11,12 +11,13 @@ config_version=5
 [application]
 
 config/name="psxhorror"
-run/main_scene="res://scenes/ui/main_menu.tscn"
+run/main_scene="res://scenes/ui/studio_splash.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
+GameSession="*res://autoload/game_session.gd"
 PsxSettings="*res://autoload/psx_settings.gd"
 PsxSurfaceTextures="*res://autoload/psx_surface_textures.gd"
 ItemDatabase="*res://autoload/item_database.gd"

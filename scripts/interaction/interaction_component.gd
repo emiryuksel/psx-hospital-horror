@@ -11,7 +11,7 @@ var current_target: Interactable = null
 
 
 func _physics_process(_delta: float) -> void:
-	if InventoryManager.is_open:
+	if GameSession.intro_active or InventoryManager.is_open:
 		if current_target:
 			current_target.set_highlighted(false)
 			current_target = null

@@ -123,10 +123,14 @@ Add-Tone $b 1800 900 0.0 0.012 0.3 0.0005 0.008 "square"
 Add-Noise $b 0.03 0.012 0.4 0.9 3.0
 Save-Wav $b "$sfxDir\flashlight_click.wav"
 
-# Pickup — yukari dogru iki tonlu blip
-$b = New-Buf 0.22
-Add-Tone $b 520 660 0.0 0.08 0.28 0.004 0.05 "sine"
-Add-Tone $b 780 980 0.07 0.12 0.26 0.004 0.08 "sine"
+# Pickup — kalin kisa nota (esya ele alma / onemli bulgu hissi)
+$b = New-Buf 0.9
+Add-Tone $b 55 48 0.0 0.78 0.6 0.004 0.38 "sine"
+Add-Tone $b 82 74 0.0 0.7 0.54 0.003 0.32 "sine"
+Add-Tone $b 123 112 0.0 0.58 0.26 0.006 0.28 "sine"
+Add-Tone $b 87 83 0.0 0.62 0.2 0.006 0.3 "sine"
+Add-Noise $b 0.0 0.035 0.32 0.38 2.4
+Add-Tone $b 65 50 0.0 0.14 0.42 0.001 0.11 "sine"
 Save-Wav $b "$sfxDir\pickup.wav"
 
 # Heal — yumusak nefes + alcak ton
@@ -156,6 +160,17 @@ Add-Tone $b 72 50 0.0 0.35 0.28 0.01 0.25 "sine"
 Add-Noise $b 0.0 0.06 0.25 0.2 2.5
 Add-Tone $b 120 65 0.0 0.22 0.18 0.005 0.18 "saw"
 Save-Wav $b "$sfxDir\ui_close.wav"
+
+# Chapter sting — kalin dramatik bolum basligi notasi (RE / Silent Hill tarzi)
+$b = New-Buf 2.4
+Add-Tone $b 41 36 0.0 2.1 0.72 0.006 1.35 "sine"
+Add-Tone $b 82 74 0.0 1.9 0.62 0.005 1.15 "sine"
+Add-Tone $b 123 112 0.0 1.6 0.32 0.008 0.95 "sine"
+Add-Tone $b 87 83 0.0 1.7 0.24 0.008 1.0 "sine"
+Add-Tone $b 164 150 0.0 1.2 0.14 0.02 0.7 "sine"
+Add-Noise $b 0.0 0.05 0.42 0.35 2.2
+Add-Tone $b 55 42 0.0 0.18 0.55 0.001 0.14 "sine"
+Save-Wav $b "$sfxDir\chapter_sting.wav"
 
 # Kilitli kapi — metalik takirti + alcak thunk
 $b = New-Buf 0.5

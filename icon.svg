@@ -1,1 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="124" height="124" x="2" y="2" fill="#363d52" stroke="#212532" stroke-width="4" rx="14"/><g fill="#fff" transform="translate(12.322 12.322)scale(.101)"><path d="M105 673v33q407 354 814 0v-33z"/><path fill="#478cbf" d="m105 673 152 14q12 1 15 14l4 67 132 10 8-61q2-11 15-15h162q13 4 15 15l8 61 132-10 4-67q3-13 15-14l152-14V427q30-39 56-81-35-59-83-108-43 20-82 47-40-37-88-64 7-51 8-102-59-28-123-42-26 43-46 89-49-7-98 0-20-46-46-89-64 14-123 42 1 51 8 102-48 27-88 64-39-27-82-47-48 49-83 108 26 42 56 81zm0 33v39c0 276 813 276 814 0v-39l-134 12-5 69q-2 10-14 13l-162 11q-12 0-16-11l-10-65H446l-10 65q-4 11-16 11l-162-11q-12-3-14-13l-5-69z"/><path d="M483 600c0 34 58 34 58 0v-86c0-34-58-34-58 0z"/><circle cx="725" cy="526" r="90"/><circle cx="299" cy="526" r="90"/></g><g fill="#414042" transform="translate(12.322 12.322)scale(.101)"><circle cx="307" cy="532" r="60"/><circle cx="717" cy="532" r="60"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="64" y1="0" x2="64" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#14141a"/>
+      <stop offset="1" stop-color="#050508"/>
+    </linearGradient>
+    <linearGradient id="blood" x1="64" y1="24" x2="64" y2="104" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f03528"/>
+      <stop offset="0.55" stop-color="#c41e18"/>
+      <stop offset="1" stop-color="#6e0e0a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="64" cy="58" r="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d91f1a" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#d91f1a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Arka plan -->
+  <rect width="128" height="128" rx="22" fill="url(#bg)"/>
+  <rect x="3" y="3" width="122" height="122" rx="20" fill="none" stroke="#2a2828" stroke-width="1.5"/>
+
+  <!-- Hafif kirmizi aura -->
+  <circle cx="64" cy="58" r="44" fill="url(#glow)"/>
+
+  <!-- Hollow halka — kirilmis, PSX hissi -->
+  <circle cx="64" cy="58" r="34" fill="none" stroke="url(#blood)" stroke-width="5.5" stroke-linecap="square" stroke-dasharray="168 36" transform="rotate(-18 64 58)"/>
+
+  <!-- Ortadaki bosluk (HOLLOWED) -->
+  <circle cx="64" cy="58" r="21" fill="#050508"/>
+  <circle cx="64" cy="58" r="21" fill="none" stroke="#1a1010" stroke-width="1"/>
+
+  <!-- Dikey catlak / damla -->
+  <path fill="#9a1814" d="M64 76 L60 92 L64 100 L68 92 Z"/>
+  <rect x="62.5" y="52" width="3" height="26" fill="#7a1210" opacity="0.85"/>
+
+  <!-- Alt ince cizgi (scanline hissi) -->
+  <rect x="22" y="108" width="84" height="2" fill="#3d3a36" opacity="0.55"/>
+  <rect x="30" y="112" width="68" height="1" fill="#2a2826" opacity="0.4"/>
+</svg>

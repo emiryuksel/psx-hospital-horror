@@ -83,9 +83,9 @@ func hide_inner_voice() -> void:
 		_hud.hide_inner_voice()
 
 
-func update_objective(text: String) -> void:
+func update_objective(text: String, animated: bool = false) -> void:
 	if _hud:
-		_hud.update_objective(text)
+		_hud.update_objective(text, animated)
 
 
 func show_weapon_viewmodel(weapon_mode: int) -> void:
@@ -121,3 +121,8 @@ func play_damage_feedback(intensity: float = 1.0) -> void:
 func play_jumpscare(intensity: float = 1.0) -> void:
 	if _hud and _hud.has_method("play_jumpscare"):
 		_hud.play_jumpscare(intensity)
+
+
+func set_gameplay_hud_visible(visible: bool) -> void:
+	if _hud and _hud.has_method("set_gameplay_hud_visible"):
+		_hud.set_gameplay_hud_visible(visible)
