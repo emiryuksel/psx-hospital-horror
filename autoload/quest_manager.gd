@@ -3,6 +3,7 @@ extends Node
 
 signal quest_updated(objective: String)
 signal power_restored
+signal fuse_install_ambush_requested
 
 enum Part1State { EXPLORE, SEEK_FUSE, RETURN_FUSE, SEEK_ELEVATOR }
 
@@ -14,7 +15,6 @@ var power_on: bool = false
 var show_chapter_objective: bool = false
 var fuse_pickup_creature_done: bool = false
 var fuse_ambush_done: bool = false
-var _pending_fuse_ambush: bool = false
 
 
 func _ready() -> void:
@@ -27,7 +27,6 @@ func reset_part1() -> void:
 	show_chapter_objective = false
 	fuse_pickup_creature_done = false
 	fuse_ambush_done = false
-	_pending_fuse_ambush = false
 	refresh_objective()
 
 
@@ -39,18 +38,11 @@ func complete_intro() -> void:
 func on_fuse_installed() -> void:
 	power_on = true
 	part1_state = Part1State.SEEK_ELEVATOR
-	if not fuse_ambush_done:
-		_pending_fuse_ambush = true
 	power_restored.emit()
+	if not fuse_ambush_done:
+		fuse_install_ambush_requested.emit()
 	refresh_objective(true)
 	HudManager.show_message("Power restored — take the elevator downstairs")
-
-
-func consume_fuse_ambush() -> bool:
-	if not _pending_fuse_ambush:
-		return false
-	_pending_fuse_ambush = false
-	return true
 
 
 func mark_fuse_pickup_creature_done() -> void:
@@ -59,7 +51,6 @@ func mark_fuse_pickup_creature_done() -> void:
 
 func mark_fuse_ambush_done() -> void:
 	fuse_ambush_done = true
-	_pending_fuse_ambush = false
 
 
 func get_objective_text() -> String:
@@ -97,7 +88,6 @@ func apply_save_data(data: Dictionary) -> void:
 			InventoryManager.has_item(FUSE_ITEM_ID) or power_on
 		)
 	)
-	_pending_fuse_ambush = false
 	_sync_state_from_inventory()
 	if data.has("show_chapter_objective"):
 		show_chapter_objective = bool(data.get("show_chapter_objective", false))

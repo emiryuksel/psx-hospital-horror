@@ -15,8 +15,9 @@ func has_save() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
 
 
-func request_load() -> void:
-	_load_requested = true
+func request_load() -> bool:
+	GameSession.cancel_new_game_request()
+	return _read_save_into_pending()
 
 
 func consume_load_request() -> bool:
@@ -26,7 +27,18 @@ func consume_load_request() -> bool:
 	return false
 
 
+func prepare_new_game() -> void:
+	_pending_load.clear()
+	_load_requested = false
+
+
 func save_game() -> bool:
+	var player := _find_player()
+	if player and player.has_method("is_dead") and player.is_dead():
+		_show_message("Cannot save while dead")
+		save_completed.emit(false)
+		return false
+
 	var data := _collect_save_data()
 	var json := JSON.stringify(data, "\t")
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -55,22 +67,31 @@ func load_game() -> bool:
 		load_completed.emit(false)
 		return false
 
-	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
-	if file == null:
+	if not _read_save_into_pending():
 		_show_message("Load failed")
 		load_completed.emit(false)
+		return false
+
+	call_deferred("_reload_current_scene")
+	load_completed.emit(true)
+	return true
+
+
+func _read_save_into_pending() -> bool:
+	if not FileAccess.file_exists(SAVE_PATH):
+		return false
+
+	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if file == null:
 		return false
 
 	var parsed: Variant = JSON.parse_string(file.get_as_text())
 	file.close()
 	if typeof(parsed) != TYPE_DICTIONARY:
-		_show_message("Corrupt save")
-		load_completed.emit(false)
 		return false
 
 	_pending_load = parsed as Dictionary
-	call_deferred("_reload_current_scene")
-	load_completed.emit(true)
+	_load_requested = true
 	return true
 
 
@@ -88,13 +109,20 @@ func apply_to_current_scene() -> void:
 
 	var data := _pending_load
 	_pending_load = {}
+	_load_requested = false
 
 	if data.get("version", 0) != SAVE_VERSION:
 		push_warning("SaveManager: farklı save versiyonu, kısmi yükleme deneniyor.")
 
 	InventoryManager.close_inventory()
+	HudManager.hide_game_over()
+	AudioManager.stop_heartbeat()
 
-	_apply_player_state(data.get("player", {}))
+	var player_data: Dictionary = data.get("player", {})
+	if not player_data.is_empty():
+		player_data = player_data.duplicate()
+		player_data["is_dead"] = false
+	_apply_player_state(player_data)
 	InventoryManager.import_slots(data.get("inventory", []))
 	_apply_combat_state(data.get("combat", {}))
 	_apply_flashlight_state(data.get("flashlight", {}))

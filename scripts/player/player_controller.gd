@@ -72,7 +72,8 @@ func _ready() -> void:
 	_interaction.focus_changed.connect(_on_focus_changed)
 	_flashlight.battery_changed.connect(func(c, m): HudManager.update_battery(c, m))
 	InventoryManager.heal_requested.connect(_on_heal_requested)
-	call_deferred("_sync_hud")
+	if not SaveManager.has_pending_load():
+		call_deferred("_sync_hud")
 
 
 func _sync_hud() -> void:

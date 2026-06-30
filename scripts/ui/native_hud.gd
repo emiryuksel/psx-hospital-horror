@@ -571,12 +571,13 @@ func _on_game_over_load_save() -> void:
 	if not SaveManager.has_save():
 		return
 	AudioManager.play("ui_paper", -4.0)
+	HudManager.hide_game_over()
 	SaveManager.load_game()
 
 
 func _on_game_over_retry() -> void:
 	AudioManager.play("ui_paper", -4.0)
-	get_tree().reload_current_scene()
+	GameSession.retry_from_death()
 
 
 func update_stamina(current: float, maximum: float) -> void:

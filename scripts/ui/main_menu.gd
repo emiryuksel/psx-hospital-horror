@@ -27,7 +27,7 @@ func _ready() -> void:
 	_btn_continue.visible = SaveManager.has_save()
 
 	_btn_start.grab_focus()
-	AudioManager.play("ui_open", -8.0)
+	AudioManager.play_menu_sting()
 
 
 func _on_start() -> void:
@@ -38,7 +38,8 @@ func _on_start() -> void:
 
 func _on_continue() -> void:
 	AudioManager.play("ui_paper", -4.0)
-	SaveManager.request_load()
+	if not SaveManager.request_load():
+		return
 	get_tree().change_scene_to_file(GAME_SCENE)
 
 

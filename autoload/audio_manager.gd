@@ -80,6 +80,11 @@ func play_chapter_sting() -> void:
 	play("chapter_sting", 1.0, 1.0, 1.0)
 
 
+func play_menu_sting() -> void:
+	# Ana menu acilis — temiz kalin synth, sabit pitch.
+	play("menu_sting", -1.0, 1.0, 1.0)
+
+
 func play_pickup(volume_db: float = -2.0) -> void:
 	# Esya alma — kalin nota, sabit pitch.
 	play("pickup", volume_db, 1.0, 1.0)

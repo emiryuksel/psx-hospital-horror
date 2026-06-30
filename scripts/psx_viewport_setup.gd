@@ -31,22 +31,12 @@ func _ready() -> void:
 	_apply_settings_from_autoload()
 	PsxSettings.settings_changed.connect(_apply_settings_from_autoload)
 
-	var is_continue := SaveManager.consume_load_request()
 	if GameSession.consume_new_game_intro():
 		call_deferred("_start_new_game_intro")
-	elif is_continue:
-		call_deferred("_deferred_load")
-
-
-func _deferred_load() -> void:
-	SaveManager.load_game()
 
 
 func _start_new_game_intro() -> void:
 	GameSession.intro_active = true
-	InventoryManager.reset_for_new_game()
-	InnerVoiceManager.reset_for_new_game()
-	QuestManager.reset_part1()
 	HudManager.set_gameplay_hud_visible(false)
 	_set_player_input_locked(true)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE

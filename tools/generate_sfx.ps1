@@ -77,6 +77,51 @@ function Add-Growl([double[]]$buf, [double]$start, [double]$dur, [double]$amp, [
     }
 }
 
+function Apply-PsxCrush([double[]]$buf, [double]$gain = 1.12) {
+    for ($i = 0; $i -lt $buf.Length; $i++) {
+        $v = $buf[$i] * $gain
+        $v = [math]::Round($v * 28.0) / 28.0
+        if ($v -gt 0.82) { $v = 0.82 + ($v - 0.82) * 0.25 }
+        if ($v -lt -0.82) { $v = -0.82 + ($v + 0.82) * 0.25 }
+        $buf[$i] = $v
+    }
+}
+
+
+function Apply-SoftEcho([double[]]$buf) {
+    $dry = New-Object 'double[]' $buf.Length
+    [array]::Copy($buf, $dry, $buf.Length)
+    $delays = @(0.044, 0.082, 0.128)
+    $gains = @(0.26, 0.17, 0.1)
+    for ($t = 0; $t -lt $delays.Length; $t++) {
+        $d = [int]($delays[$t] * $SR)
+        for ($i = $d; $i -lt $buf.Length; $i++) {
+            $buf[$i] += $dry[$i - $d] * $gains[$t]
+        }
+    }
+}
+
+
+function Apply-HallEcho([double[]]$buf) {
+    $dry = New-Object 'double[]' $buf.Length
+    [array]::Copy($buf, $dry, $buf.Length)
+    $delays = @(0.036, 0.058, 0.094, 0.141, 0.198)
+    $gains = @(0.48, 0.4, 0.32, 0.24, 0.17)
+    for ($t = 0; $t -lt $delays.Length; $t++) {
+        $d = [int]($delays[$t] * $SR)
+        $g = $gains[$t]
+        for ($i = $d; $i -lt $buf.Length; $i++) {
+            $buf[$i] += $dry[$i - $d] * $g
+        }
+    }
+    $fb = [int](0.082 * $SR)
+    $sm = 0.0
+    for ($i = $fb; $i -lt $buf.Length; $i++) {
+        $sm = $sm + 0.22 * ($buf[$i - $fb] - $sm)
+        $buf[$i] += $sm * 0.38
+    }
+}
+
 function Save-Wav([double[]]$buf, [string]$path) {
     $full = [System.IO.Path]::GetFullPath((Join-Path (Get-Location) $path))
     $fs = [System.IO.File]::Open($full, [System.IO.FileMode]::Create)
@@ -145,13 +190,23 @@ Add-Noise $b 0.0 0.16 0.28 0.5 2.2
 Add-Tone $b 1400 1100 0.0 0.05 0.05 0.002 0.04 "saw"
 Save-Wav $b "$sfxDir\ui_paper.wav"
 
-# UI open — derin, ominous metalik rezonans + alcak drone
-$b = New-Buf 0.45
-Add-Tone $b 55 48 0.0 0.4 0.5 0.01 0.25 "sine"
-Add-Tone $b 82 75 0.0 0.35 0.3 0.01 0.2 "sine"
-Add-Noise $b 0.0 0.08 0.3 0.15 2.0
-Add-Tone $b 165 140 0.02 0.2 0.15 0.01 0.15 "saw"
+# UI open — hafif panel acilis (envanter / pause; ince, alcak)
+$b = New-Buf 0.32
+Add-Tone $b 62 55 0.0 0.28 0.38 0.008 0.18 "sine"
+Add-Tone $b 93 86 0.0 0.22 0.22 0.006 0.14 "sine"
+Add-Noise $b 0.0 0.05 0.18 0.22 2.0
 Save-Wav $b "$sfxDir\ui_open.wav"
+
+# Menu sting — temiz kalin synth + hafif echo (ana menu, az PSX)
+$b = New-Buf 0.85
+Add-Tone $b 55 47 0.0 0.6 0.64 0.014 0.4 "sine"
+Add-Tone $b 55.6 47.8 0.0 0.58 0.42 0.014 0.38 "sine"
+Add-Tone $b 82 73 0.0 0.52 0.36 0.012 0.34 "sine"
+Add-Tone $b 110 99 0.0 0.45 0.2 0.014 0.3 "sine"
+Add-Tone $b 27.5 23 0.0 0.65 0.58 0.016 0.46 "sine"
+Add-Noise $b 0.0 0.02 0.1 0.38 3.0
+Apply-SoftEcho $b
+Save-Wav $b "$sfxDir\menu_sting.wav"
 
 # UI close — agir kapanan kalin nota + reverse drone
 $b = New-Buf 0.5

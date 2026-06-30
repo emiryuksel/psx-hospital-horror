@@ -53,6 +53,8 @@ const FLOOR_TOP := 0.0
 const BED_MATTRESS_TOP := 0.63
 const BED_MATTRESS_TOP_BLOODY := 0.67
 const RECEPTION_DESK_TOP := 1.1
+const RECEPTION_DESK_CENTER := Vector3(0.0, 0.0, -1.5)
+const FUSE_INSTALL_AMBUSH_SPAWN := RECEPTION_DESK_CENTER + Vector3(0.0, 0.0, -0.95)
 const CART_TOP := 0.54
 const WORKBENCH_TOP := 0.9
 
@@ -76,23 +78,26 @@ func _ready() -> void:
 		_apply_fog_settings()
 		PsxSettings.settings_changed.connect(_apply_fog_settings)
 		QuestManager.power_restored.connect(_on_power_restored)
+		QuestManager.fuse_install_ambush_requested.connect(_on_fuse_install_ambush_requested)
 		InventoryManager.item_added.connect(_on_item_picked_up)
 
 	_rebuild_geometry()
 
 	if not Engine.is_editor_hint():
-		if QuestManager.power_on:
-			_on_power_restored()
+		if SaveManager.has_pending_load():
+			call_deferred("_try_apply_save")
 		else:
-			_apply_low_power_lighting()
-		_fuse_pickup_creature_spawned = QuestManager.fuse_pickup_creature_done
-		_fuse_install_creature_spawned = QuestManager.fuse_ambush_done
+			if QuestManager.power_on:
+				_on_power_restored()
+			else:
+				_apply_low_power_lighting()
+			_fuse_pickup_creature_spawned = QuestManager.fuse_pickup_creature_done
+			_fuse_install_creature_spawned = QuestManager.fuse_ambush_done
 		QuestManager.refresh_objective()
 		if GameSession.intro_pending:
 			GameSession.intro_completed.connect(_start_ambient_drone, CONNECT_ONE_SHOT)
 		else:
 			_start_ambient_drone()
-		call_deferred("_try_apply_save")
 
 
 func _try_apply_save() -> void:
@@ -104,6 +109,8 @@ func _try_apply_save() -> void:
 	_fuse_install_creature_spawned = QuestManager.fuse_ambush_done
 	if QuestManager.power_on:
 		_on_power_restored()
+	else:
+		_apply_low_power_lighting()
 
 
 func _start_ambient_drone() -> void:
@@ -147,8 +154,10 @@ func _on_power_restored() -> void:
 	for light in _power_lights:
 		if is_instance_valid(light):
 			light.visible = true
-	if QuestManager.consume_fuse_ambush():
-		call_deferred("spawn_fuse_install_creature")
+
+
+func _on_fuse_install_ambush_requested() -> void:
+	call_deferred("spawn_fuse_install_creature")
 
 
 func _apply_low_power_lighting() -> void:
@@ -889,22 +898,22 @@ func spawn_fuse_pickup_creature() -> void:
 	)
 
 
-# Fuse takıldığında — oyuncunun önünde tek zombi belirir.
+# Fuse takıldığında — resepsiyon masasının arkasından tek zombi belirir.
 func spawn_fuse_install_creature() -> void:
-	if Engine.is_editor_hint() or _fuse_install_creature_spawned:
+	if Engine.is_editor_hint() or _fuse_install_creature_spawned or QuestManager.fuse_ambush_done:
 		return
 	_fuse_install_creature_spawned = true
 	QuestManager.mark_fuse_ambush_done()
 
-	var player := get_tree().get_first_node_in_group("player") as CharacterBody3D
-	var spawn_pos := Vector3(0.0, 0.0, _corridor_center_z - CORRIDOR_LENGTH * 0.4)
-	if player:
-		var fwd := -player.global_transform.basis.z
-		fwd.y = 0.0
-		if fwd.length_squared() > 0.01:
-			spawn_pos = player.global_position + fwd.normalized() * 2.2
-
+	var spawn_pos := FUSE_INSTALL_AMBUSH_SPAWN
 	var enemy := _spawn_ambush_enemy("MistCrawlerInstall", spawn_pos)
+
+	var player := get_tree().get_first_node_in_group("player") as CharacterBody3D
+	if player:
+		var look_target := player.global_position
+		look_target.y = enemy.global_position.y
+		enemy.look_at(look_target, Vector3.UP)
+
 	_play_creature_jumpscare(1.25)
 	AudioManager.play("enemy_alert", 2.0, 0.9, 1.0)
 	AudioManager.play_3d("enemy_growl", enemy.global_position, -1.0, 0.85, 0.95)
