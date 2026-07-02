@@ -28,6 +28,8 @@ signal health_changed(current: float, maximum: float)
 
 @export_group("Camera")
 @export var mouse_sensitivity: float = 0.002
+@export var gamepad_look_sensitivity: float = 2.6
+@export var gamepad_look_deadzone: float = 0.15
 @export var head_bob_frequency: float = 2.2
 @export var head_bob_amplitude: float = 0.035
 @export var head_height: float = 1.55
@@ -101,6 +103,20 @@ func _input(event: InputEvent) -> void:
 		head.rotation.x = _pitch
 
 
+# Xbox/gamepad sağ analog stick ile kamera bakışı.
+func _apply_gamepad_look(delta: float) -> void:
+	var look := Input.get_vector("look_left", "look_right", "look_up", "look_down", gamepad_look_deadzone)
+	if look == Vector2.ZERO:
+		return
+	# Karesel tepki eğrisi — hassas nişan + hızlı dönüş.
+	var curved := Vector2(look.x * absf(look.x), look.y * absf(look.y))
+	_yaw -= curved.x * gamepad_look_sensitivity * delta
+	_pitch -= curved.y * gamepad_look_sensitivity * delta
+	_pitch = clampf(_pitch, deg_to_rad(-85.0), deg_to_rad(85.0))
+	rotation.y = _yaw
+	head.rotation.x = _pitch
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if _input_locked or _is_dead:
 		return
@@ -118,6 +134,8 @@ func _physics_process(delta: float) -> void:
 	if _input_locked or _is_dead or InventoryManager.is_open:
 		velocity = Vector3.ZERO
 		return
+
+	_apply_gamepad_look(delta)
 
 	_is_crouching = Input.is_action_pressed("crouch")
 

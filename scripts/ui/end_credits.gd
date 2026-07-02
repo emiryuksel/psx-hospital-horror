@@ -4,10 +4,10 @@ extends Control
 
 const MAIN_MENU_SCENE := "res://scenes/ui/main_menu.tscn"
 
-const SCROLL_SPEED := 42.0
-const START_PAD := 120.0
+const SCROLL_SPEED := 78.0
+const START_PAD := 60.0
 const END_PAD := 160.0
-const HOLD_AFTER := 1.6
+const HOLD_AFTER := 1.2
 
 @onready var _scroll_clip: Control = $ScrollClip
 @onready var _credits: VBoxContainer = $ScrollClip/CreditsVBox
@@ -32,10 +32,10 @@ func _ready() -> void:
 
 
 func _run_credits() -> void:
-	# Layout'un oturması için boyutlar geçerli olana kadar bekle.
+	# Layout'un oturması için boyutlar geçerli olana kadar bekle (en fazla birkaç kare).
 	var clip_h := 0.0
 	var content_h := 0.0
-	for _i in 30:
+	for _i in 8:
 		await get_tree().process_frame
 		clip_h = _scroll_clip.size.y
 		content_h = _credits.get_combined_minimum_size().y
@@ -58,7 +58,7 @@ func _run_credits() -> void:
 	var black_out := create_tween()
 	black_out.set_ease(Tween.EASE_OUT)
 	black_out.set_trans(Tween.TRANS_SINE)
-	black_out.tween_property(_fade_layer, "color:a", 0.0, 1.2)
+	black_out.tween_property(_fade_layer, "color:a", 0.0, 0.7)
 	await black_out.finished
 
 	_skippable = true

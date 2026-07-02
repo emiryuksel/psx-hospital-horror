@@ -125,10 +125,10 @@ func _start_ambient_drone() -> void:
 
 
 func _show_inventory_hint() -> void:
-	# Oyun başında envanterin TAB ile açıldığını hatırlat.
+	# Oyun başında envanterin nasıl açıldığını hatırlat (klavye TAB / gamepad MENU).
 	await get_tree().create_timer(1.5).timeout
 	if is_instance_valid(self):
-		HudManager.show_hint("Press [TAB] to open your inventory", 5.0)
+		HudManager.show_hint("Press [%s] to open your inventory" % HudManager.inventory_hint(), 5.0)
 
 
 func _input(event: InputEvent) -> void:

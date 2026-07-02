@@ -1,4 +1,9 @@
 # PSX hastane texture seti — temiz, yapisal, dusuk kontrast (nearest-neighbor friendly).
+# -Only "corpse" ile sadece belirli bir texture'i (ornegin ceset) uretebilirsiniz;
+# boylece git'te olan diger texture'lar EZILMEZ.
+param(
+    [string]$Only = ""
+)
 Add-Type -AssemblyName System.Drawing
 
 $root = Join-Path $PSScriptRoot "..\assets\textures"
@@ -17,6 +22,10 @@ function Clamp([int]$v) { [Math]::Max(0, [Math]::Min(255, $v)) }
 $global:rand = New-Object Random 1337
 function Grain([int]$amp) {
     return $global:rand.Next(-$amp, $amp + 1)
+}
+
+function Fill-Rect($bx, [int]$x0, [int]$y0, [int]$x1, [int]$y1, $col) {
+    for ($yy = $y0; $yy -lt $y1; $yy++) { for ($xx = $x0; $xx -lt $x1; $xx++) { $bx.SetPixel($xx, $yy, $col) } }
 }
 
 function Make-Wall {
@@ -299,6 +308,62 @@ function Make-Blood {
     Save-Bmp $bmp (Join-Path $props "blood.png")
 }
 
+# Korkunc ceset teni — solgun/curumus, lekeli, damarli. Ceset kutularina map'lenir.
+function Make-Corpse {
+    param([int]$Size = 128)
+    $bmp = New-Object System.Drawing.Bitmap $Size, $Size
+    for ($y = 0; $y -lt $Size; $y++) {
+        for ($x = 0; $x -lt $Size; $x++) {
+            # Taban: hastalikli gri-yesil solgun ten, dusuk frekansli lekelenme
+            $mottle = [int]([Math]::Sin($x * 0.09) * [Math]::Cos($y * 0.11) * 16)
+            $g = Grain 8
+            $r = Clamp(96 + $mottle + $g)
+            $gn = Clamp(104 + $mottle + $g)
+            $b = Clamp(88 + [int]($mottle * 0.6) + $g)
+            # Curume lekeleri — koyu yesil-mor benekler
+            $blotch = ($global:rand.Next(0, 100) -gt 92)
+            if ($blotch) {
+                $r = Clamp($r - 44); $gn = Clamp($gn - 30); $b = Clamp($b - 20)
+            }
+            # Damar hatlari — ince koyu mor cizgiler
+            $vein = ([Math]::Abs([Math]::Sin($x * 0.4 + $y * 0.25)) -gt 0.94)
+            if ($vein) {
+                $r = Clamp($r - 26); $gn = Clamp($gn - 34); $b = Clamp($b - 10)
+            }
+            # Kurumus kan sivanmasi — ust bolgede kizil-kahve akintilar
+            $bloodStreak = ($y -lt 54 -and ([Math]::Abs([Math]::Sin($x * 0.6)) -gt 0.86))
+            if ($bloodStreak) {
+                $r = Clamp(88 + $g); $gn = Clamp(20 + $g); $b = Clamp(16 + $g)
+            }
+            $bmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb((Clamp($r)), (Clamp($gn)), (Clamp($b))))
+        }
+    }
+
+    # Karanlik goz cukurlari + acilmis aci dolu agiz — yuze denk gelen bolge (baş kutusu ~ust orta).
+    $void = [System.Drawing.Color]::FromArgb(10, 8, 10)
+    $gore = [System.Drawing.Color]::FromArgb(70, 14, 12)
+    # sol goz cukuru
+    Fill-Rect $bmp 30 34 48 50 $void
+    # sag goz cukuru
+    Fill-Rect $bmp 80 34 98 50 $void
+    # bagirir agiz — koyu bosluk + alt kan
+    Fill-Rect $bmp 50 72 78 96 $void
+    Fill-Rect $bmp 52 90 76 98 $gore
+    # dis sirasi (birkac soluk dikey cizgi)
+    for ($tx = 54; $tx -lt 76; $tx += 5) { Fill-Rect $bmp $tx 72 ($tx + 2) 80 ([System.Drawing.Color]::FromArgb(150, 148, 130)) }
+
+    Save-Bmp $bmp (Join-Path $props "corpse.png")
+}
+
+if ($Only -ne "") {
+    switch ($Only.ToLower()) {
+        "corpse" { Make-Corpse }
+        default { Write-Host "Bilinmeyen -Only degeri: $Only"; exit 1 }
+    }
+    Write-Host "Generated texture: $Only"
+    exit 0
+}
+
 Make-Wall
 Make-Floor
 Make-Ceiling
@@ -313,6 +378,7 @@ Make-Ammo
 Make-Note
 Make-Debris
 Make-Blood
+Make-Corpse
 
 Write-Host "Generated PSX textures."
 Get-ChildItem $hospital, $props -Filter "*.png" | Format-Table Name, Length

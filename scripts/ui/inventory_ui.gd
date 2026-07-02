@@ -12,9 +12,15 @@ var _slot_buttons: Array[Button] = []
 var _selected_slot: int = -1
 var _combine_source_slot: int = -1
 
+# Çift tıklama / çift-A ile kullan algılaması.
+const DOUBLE_PRESS_WINDOW := 0.4
+var _last_press_slot: int = -1
+var _last_press_time: float = 0.0
+
 
 func _ready() -> void:
 	_build_slot_buttons()
+	_setup_focus_chain()
 	_panel.visible = false
 	InventoryManager.inventory_changed.connect(_refresh_slots)
 	InventoryManager.inventory_toggled.connect(_on_inventory_toggled)
@@ -31,8 +37,36 @@ func _build_slot_buttons() -> void:
 		btn.text = "-"
 		var slot_index := i
 		btn.pressed.connect(func() -> void: _on_slot_pressed(slot_index))
+		# Gamepad/klavye ile slotlar arası gezerken odaklanınca hemen seç
+		# ki detay paneli güncellensin (fare hover'ının karşılığı).
+		btn.focus_entered.connect(func() -> void: _on_slot_focused(slot_index))
 		_slot_grid.add_child(btn)
 		_slot_buttons.append(btn)
+
+
+# Odak (gamepad/klavye gezinme) slotu seçer ama toggle-combine akışını tetiklemez.
+func _on_slot_focused(index: int) -> void:
+	_select_slot(index)
+
+
+# Grid ile detay butonları arasında gamepad/klavye ile geçişi garanti et.
+func _setup_focus_chain() -> void:
+	var columns := _slot_grid.columns
+	var total := _slot_buttons.size()
+	if total == 0 or columns <= 0:
+		return
+	# Grid'in son satırındaki butonlardan aşağıya Use butonuna geç.
+	var remainder := total % columns
+	var last_row_count := remainder if remainder != 0 else columns
+	var last_row_start := total - last_row_count
+	for i in range(last_row_start, total):
+		_slot_buttons[i].focus_neighbor_bottom = _use_button.get_path()
+	# Use/Combine'dan yukarı grid'in son satırına dön.
+	var up_target := _slot_buttons[last_row_start]
+	_use_button.focus_neighbor_top = up_target.get_path()
+	_combine_button.focus_neighbor_top = up_target.get_path()
+	_use_button.focus_neighbor_right = _combine_button.get_path()
+	_combine_button.focus_neighbor_left = _use_button.get_path()
 
 
 func _on_inventory_toggled(is_open: bool) -> void:
@@ -41,6 +75,9 @@ func _on_inventory_toggled(is_open: bool) -> void:
 		_refresh_slots()
 		_clear_selection()
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		# Kontrolcü ile gezinmenin başlaması için ilk slota odaklan.
+		if not _slot_buttons.is_empty():
+			_slot_buttons[0].grab_focus()
 	else:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
@@ -51,8 +88,32 @@ func _on_slot_pressed(index: int) -> void:
 		_combine_source_slot = -1
 		_combine_button.text = "Combine"
 		_select_slot(index)
+		_last_press_slot = -1
 		return
 
+	# Aynı slota kısa süre içinde ikinci basış = kullan (fare çift tıklama / çift-A).
+	var now := Time.get_ticks_msec() / 1000.0
+	var is_double := index == _last_press_slot and (now - _last_press_time) <= DOUBLE_PRESS_WINDOW
+	_last_press_slot = index
+	_last_press_time = now
+
+	_select_slot(index)
+
+	if is_double:
+		_last_press_slot = -1
+		_try_use_slot(index)
+
+
+# Seçili slottaki item kullanılabilirse kullan.
+func _try_use_slot(index: int) -> void:
+	var entry: Dictionary = InventoryManager.get_slot(index)
+	if entry.is_empty():
+		return
+	var item: Item = entry["item"]
+	if not _can_use(item):
+		return
+	InventoryManager.use_item(index)
+	_refresh_slots()
 	_select_slot(index)
 
 
@@ -116,9 +177,7 @@ func _refresh_slots() -> void:
 func _on_use_pressed() -> void:
 	if _selected_slot < 0:
 		return
-	InventoryManager.use_item(_selected_slot)
-	_refresh_slots()
-	_select_slot(_selected_slot)
+	_try_use_slot(_selected_slot)
 
 
 func _on_combine_pressed() -> void:

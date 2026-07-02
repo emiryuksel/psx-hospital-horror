@@ -13,10 +13,17 @@ var current_target: Interactable = null
 func _physics_process(_delta: float) -> void:
 	if GameSession.intro_active or InventoryManager.is_open:
 		if current_target:
-			current_target.set_highlighted(false)
+			if is_instance_valid(current_target):
+				current_target.set_highlighted(false)
 			current_target = null
 			focus_changed.emit(null)
 		return
+
+	# Hedef bu frame'de yok edildiyse (ör. pickup toplandı) odağı hemen temizle,
+	# yoksa prompt ekranda takılı kalır.
+	if current_target and not is_instance_valid(current_target):
+		current_target = null
+		focus_changed.emit(null)
 
 	_update_focus()
 
@@ -31,7 +38,7 @@ func _update_focus() -> void:
 		new_target = _find_interactable(_ray.get_collider())
 
 	if new_target != current_target:
-		if current_target:
+		if current_target and is_instance_valid(current_target):
 			current_target.set_highlighted(false)
 		current_target = new_target
 		if current_target:

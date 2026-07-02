@@ -89,6 +89,7 @@ func interact(actor: Node3D) -> void:
 
 	if InventoryManager.add_item(item, pickup_count):
 		_collected = true
+		HudManager.hide_prompt()
 		interacted.emit(actor)
 		queue_free()
 	else:

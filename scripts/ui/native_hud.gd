@@ -606,8 +606,8 @@ func _sync_initial_values() -> void:
 	update_battery(100.0, 100.0)
 
 
-func show_prompt(text: String) -> void:
-	_prompt_label.text = "[E] %s" % text
+func show_prompt(text: String, key_label: String = "E") -> void:
+	_prompt_label.text = "[%s] %s" % [key_label, text]
 	_prompt_label.visible = true
 
 

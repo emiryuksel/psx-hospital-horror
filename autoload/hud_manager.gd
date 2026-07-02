@@ -3,14 +3,50 @@ extends Node
 
 var _hud: CanvasLayer = null
 
+# Son kullanılan input cihazı: false = klavye/fare, true = gamepad.
+# Prompt ve ipuçlarında doğru tuş etiketini (E vs A, TAB vs MENU) göstermek için.
+var using_gamepad: bool = false
+var _last_prompt_text: String = ""
+var _prompt_active: bool = false
+
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+
+func _input(event: InputEvent) -> void:
+	var was_gamepad := using_gamepad
+	if event is InputEventJoypadButton or event is InputEventJoypadMotion:
+		# Küçük stick/trigger gürültüsünü yok say.
+		if event is InputEventJoypadMotion and absf((event as InputEventJoypadMotion).axis_value) < 0.5:
+			return
+		using_gamepad = true
+	elif event is InputEventKey or event is InputEventMouseButton or event is InputEventMouseMotion:
+		using_gamepad = false
+	if was_gamepad != using_gamepad and _prompt_active:
+		# Aktif prompt varken cihaz değişirse etiketi güncelle.
+		show_prompt(_last_prompt_text)
+
+
+# Etkileşim tuşu etiketi — gamepad'de "A", klavyede "E".
+func interact_hint() -> String:
+	return "A" if using_gamepad else "E"
+
+
+# Envanter tuşu etiketi — gamepad'de "MENU", klavyede "TAB".
+func inventory_hint() -> String:
+	return "MENU" if using_gamepad else "TAB"
+
 
 func register(hud: CanvasLayer) -> void:
 	_hud = hud
 
 
 func show_prompt(text: String) -> void:
+	_last_prompt_text = text
+	_prompt_active = true
 	if _hud:
-		_hud.show_prompt(text)
+		_hud.show_prompt(text, interact_hint())
 
 
 func show_message(text: String) -> void:
@@ -26,6 +62,7 @@ func show_hint(text: String, duration: float = 4.5) -> void:
 
 
 func hide_prompt() -> void:
+	_prompt_active = false
 	if _hud:
 		_hud.hide_prompt()
 

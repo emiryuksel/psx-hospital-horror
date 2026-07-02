@@ -5,6 +5,8 @@ extends Node3D
 
 const GENERATED_GROUP := "generated_part2"
 
+const _CORPSE_TEX_PATH := "res://assets/textures/props/corpse.png"
+
 # --- Renk paleti (Part 1'den koyu/soğuk türev) ---
 const FLOOR_COLOR := Color(0.18, 0.19, 0.20)
 const WALL_COLOR := Color(0.30, 0.31, 0.32)
@@ -857,7 +859,8 @@ func _build_pickups() -> void:
 
 
 # Yere yığılmış ölü beden — kutulardan basit PSX ceset. yaw radyan cinsinden
-# gövdenin dönüşünü belirler (bedenin uzandığı yön).
+# gövdenin dönüşünü belirler (bedenin uzandığı yön). Korkunç ceset texture'ı
+# (corpse.png) gövde ve başa uygulanır.
 func _add_corpse(node_name: String, pos: Vector3, yaw: float) -> void:
 	var root := Node3D.new()
 	root.name = node_name
@@ -866,27 +869,29 @@ func _add_corpse(node_name: String, pos: Vector3, yaw: float) -> void:
 	root.add_to_group(GENERATED_GROUP)
 	add_child(root)
 
-	var skin := Color(0.62, 0.58, 0.52)
 	var cloth := Color(0.24, 0.22, 0.24)
 
-	# Yere uzanmış gövde (alçak, yatay)
-	_add_corpse_box(root, "Torso", Vector3(0.0, 0.18, 0.0), Vector3(0.5, 0.32, 0.9), cloth)
-	# Baş — gövdenin bir ucunda
-	_add_corpse_box(root, "Head", Vector3(0.0, 0.16, 0.62), Vector3(0.26, 0.26, 0.26), skin)
-	# Bacaklar — diğer uçta, hafif yana devrik
-	_add_corpse_box(root, "Legs", Vector3(0.08, 0.14, -0.7), Vector3(0.42, 0.24, 0.7), cloth)
-	# Yana açılmış kol (silahın uzandığı taraf)
-	_add_corpse_box(root, "Arm", Vector3(0.42, 0.12, 0.2), Vector3(0.5, 0.18, 0.2), skin)
+	# Yere uzanmış gövde (alçak, yatay) — çürümüş ten texture'ı
+	_add_corpse_box(root, "Torso", Vector3(0.0, 0.18, 0.0), Vector3(0.5, 0.32, 0.9), Color(0.7, 0.72, 0.66), true)
+	# Baş — gövdenin bir ucunda, korkunç yüz texture'ı
+	_add_corpse_box(root, "Head", Vector3(0.0, 0.16, 0.62), Vector3(0.26, 0.26, 0.26), Color(0.72, 0.74, 0.68), true)
+	# Bacaklar — diğer uçta, hafif yana devrik (giysi)
+	_add_corpse_box(root, "Legs", Vector3(0.08, 0.14, -0.7), Vector3(0.42, 0.24, 0.7), cloth, false)
+	# Yana açılmış kol (silahın uzandığı taraf) — ten texture'ı
+	_add_corpse_box(root, "Arm", Vector3(0.42, 0.12, 0.2), Vector3(0.5, 0.18, 0.2), Color(0.7, 0.72, 0.66), true)
 
 
-func _add_corpse_box(parent: Node3D, node_name: String, local_pos: Vector3, box_size: Vector3, color: Color) -> void:
+func _add_corpse_box(parent: Node3D, node_name: String, local_pos: Vector3, box_size: Vector3, color: Color, use_flesh: bool) -> void:
 	var mi := MeshInstance3D.new()
 	mi.name = node_name
 	mi.position = local_pos
 	var box := BoxMesh.new()
 	box.size = box_size
 	mi.mesh = box
-	mi.material_override = PsxMaterialHelper.create_material(color)
+	if use_flesh and ResourceLoader.exists(_CORPSE_TEX_PATH):
+		mi.material_override = PsxMaterialHelper.create_textured_material(_CORPSE_TEX_PATH, color, Vector3.ONE)
+	else:
+		mi.material_override = PsxMaterialHelper.create_material(color)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	parent.add_child(mi)
 
@@ -1100,4 +1105,3 @@ func _on_item_picked_up(item: Item, _slot_index: int, _count: int) -> void:
 	if item.id == "maintenance_key":
 		QuestManager.on_maintenance_key_found()
 		call_deferred("spawn_cold_storage_stalker")
-
