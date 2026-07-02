@@ -54,13 +54,16 @@ const BED_MATTRESS_TOP := 0.63
 const BED_MATTRESS_TOP_BLOODY := 0.67
 const RECEPTION_DESK_TOP := 1.1
 const RECEPTION_DESK_CENTER := Vector3(0.0, 0.0, -1.5)
-const FUSE_INSTALL_AMBUSH_SPAWN := RECEPTION_DESK_CENTER + Vector3(0.0, 0.0, -0.95)
+const FUSE_INSTALL_AMBUSH_SPAWN := RECEPTION_DESK_CENTER
+const FUSE_INSTALL_AMBUSH_CHASE_DELAY := 1.35
 const CART_TOP := 0.54
 const WORKBENCH_TOP := 0.9
 
 var _corridor_center_z: float = 0.0
 var _utility_center: Vector3 = Vector3.ZERO
 var _power_lights: Array[Light3D] = []
+var _elevator_light: OmniLight3D = null
+var _elevator_light_tween: Tween = null
 
 @onready var _lobby_omni: OmniLight3D = $OmniLight3D
 @onready var _entrance_omni: OmniLight3D = $OmniLight3D_Entrance
@@ -96,6 +99,7 @@ func _ready() -> void:
 		QuestManager.refresh_objective()
 		if GameSession.intro_pending:
 			GameSession.intro_completed.connect(_start_ambient_drone, CONNECT_ONE_SHOT)
+			GameSession.intro_completed.connect(_show_inventory_hint, CONNECT_ONE_SHOT)
 		else:
 			_start_ambient_drone()
 
@@ -103,18 +107,28 @@ func _ready() -> void:
 func _try_apply_save() -> void:
 	if not SaveManager.has_pending_load():
 		return
-	await get_tree().process_frame
-	SaveManager.apply_to_current_scene()
-	_fuse_pickup_creature_spawned = QuestManager.fuse_pickup_creature_done
-	_fuse_install_creature_spawned = QuestManager.fuse_ambush_done
-	if QuestManager.power_on:
-		_on_power_restored()
-	else:
-		_apply_low_power_lighting()
+	for _attempt in 4:
+		await get_tree().process_frame
+		if SaveManager.try_apply_to_current_scene():
+			break
+	if not SaveManager.has_pending_load():
+		_fuse_pickup_creature_spawned = QuestManager.fuse_pickup_creature_done
+		_fuse_install_creature_spawned = QuestManager.fuse_ambush_done
+		if QuestManager.power_on:
+			_on_power_restored()
+		else:
+			_apply_low_power_lighting()
 
 
 func _start_ambient_drone() -> void:
 	AudioManager.start_ambient("ambient_drone", -16.0)
+
+
+func _show_inventory_hint() -> void:
+	# Oyun başında envanterin TAB ile açıldığını hatırlat.
+	await get_tree().create_timer(1.5).timeout
+	if is_instance_valid(self):
+		HudManager.show_hint("Press [TAB] to open your inventory", 5.0)
 
 
 func _input(event: InputEvent) -> void:
@@ -154,6 +168,19 @@ func _on_power_restored() -> void:
 	for light in _power_lights:
 		if is_instance_valid(light):
 			light.visible = true
+	_activate_elevator_call_light()
+
+
+# Güç gelince asansör davet ışığını yak ve yumuşak nabızla parlat.
+func _activate_elevator_call_light() -> void:
+	if not is_instance_valid(_elevator_light):
+		return
+	_elevator_light.visible = true
+	if _elevator_light_tween and _elevator_light_tween.is_valid():
+		_elevator_light_tween.kill()
+	_elevator_light_tween = create_tween().set_loops()
+	_elevator_light_tween.tween_property(_elevator_light, "light_energy", 1.1, 1.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_elevator_light_tween.tween_property(_elevator_light, "light_energy", 0.4, 1.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 
 func _on_fuse_install_ambush_requested() -> void:
@@ -582,6 +609,17 @@ func _build_lights() -> void:
 	_add_power_light("UtilityLight", _utility_center + Vector3(0, 2.5, 0), 0.5, 7.0, Color(0.92, 0.86, 0.7))
 	# Resepsiyon — guc olmasa da loş acil aydinlatma (masa giris noktasindan gorunsun).
 	_add_ambient_fill_light("ReceptionFill", Vector3(0, 2.2, -1.5), 0.12, 7.0, Color(0.55, 0.50, 0.42))
+	# Asansör davet ışığı — güç gelene kadar kapalı; _on_power_restored ile yanıp
+	# nabız gibi parlar, oyuncuyu asansöre yönlendirir.
+	_elevator_light = OmniLight3D.new()
+	_elevator_light.name = "ElevatorCallLight"
+	_elevator_light.position = Vector3(LOBBY_SIZE.x * 0.5 - 0.9, 1.6, -2.3)
+	_elevator_light.light_color = Color(0.45, 0.85, 0.55)
+	_elevator_light.light_energy = 0.0
+	_elevator_light.omni_range = 5.0
+	_elevator_light.visible = false
+	_elevator_light.add_to_group(GENERATED_GROUP)
+	add_child(_elevator_light)
 
 
 func _add_power_light(node_name: String, pos: Vector3, energy: float, range: float, color: Color) -> void:
@@ -764,19 +802,8 @@ func _build_pickups() -> void:
 	)
 	_add_pickup_spotlight("FlashlightSpot", Vector3(0.15, 1.75, -1.35), Color(0.9, 0.92, 0.55), 2.6, 2.4)
 
-	# Silah — Room G (sag, z_offset=-8.5): koridorun kuzey ucuna yakin, gec bulunan oda
-	var pistol_room_x := room_x_off
-	var pistol_room_z := cz + (-8.5)
-	var pistol_bed_x := _bed_x(pistol_room_x, 1)
-	_add_pickup(
-		"PickupPistol",
-		"pistol",
-		1,
-		Vector3(pistol_bed_x - 0.1, _y_on_surface(BED_MATTRESS_TOP, 0.2), pistol_room_z - 0.35),
-		Vector3(0.42, 0.2, 0.26),
-		Color(0.55, 0.58, 0.66)
-	)
-	_add_pickup_spotlight("PistolSpot", Vector3(pistol_bed_x - 0.1, 1.6, pistol_room_z - 0.35), Color(0.75, 0.82, 1.0), 2.4, 2.2)
+	# Silah Part 2 girişinde (bodrum landing) ölü bir bedenin yanında bulunur —
+	# Part 1'de artık silah yok.
 
 	# Fuse — Room E (sag, z_offset=-3.0) yatak üstünde, notun yanında
 	var fuse_room_x := room_x_off
@@ -898,23 +925,22 @@ func spawn_fuse_pickup_creature() -> void:
 	)
 
 
-# Fuse takıldığında — resepsiyon masasının arkasından tek zombi belirir.
+# Fuse takıldığında — resepsiyon masasında belirir, kısa süre sonra saldırır.
 func spawn_fuse_install_creature() -> void:
 	if Engine.is_editor_hint() or _fuse_install_creature_spawned or QuestManager.fuse_ambush_done:
 		return
 	_fuse_install_creature_spawned = true
 	QuestManager.mark_fuse_ambush_done()
 
-	var spawn_pos := FUSE_INSTALL_AMBUSH_SPAWN
-	var enemy := _spawn_ambush_enemy("MistCrawlerInstall", spawn_pos)
+	var enemy := _spawn_ambush_enemy(
+		"MistCrawlerInstall",
+		FUSE_INSTALL_AMBUSH_SPAWN,
+		EnemyAI.State.IDLE,
+		FUSE_INSTALL_AMBUSH_CHASE_DELAY
+	)
+	enemy.rotation.y = -PI * 0.5
 
-	var player := get_tree().get_first_node_in_group("player") as CharacterBody3D
-	if player:
-		var look_target := player.global_position
-		look_target.y = enemy.global_position.y
-		enemy.look_at(look_target, Vector3.UP)
-
-	_play_creature_jumpscare(1.25)
+	_play_creature_jumpscare(1.05)
 	AudioManager.play("enemy_alert", 2.0, 0.9, 1.0)
 	AudioManager.play_3d("enemy_growl", enemy.global_position, -1.0, 0.85, 0.95)
 
@@ -927,7 +953,12 @@ func spawn_fuse_install_creature() -> void:
 	)
 
 
-func _spawn_ambush_enemy(enemy_name: String, spawn_pos: Vector3) -> EnemyAI:
+func _spawn_ambush_enemy(
+	enemy_name: String,
+	spawn_pos: Vector3,
+	initial_state: EnemyAI.State = EnemyAI.State.CHASE,
+	chase_delay: float = 0.0
+) -> EnemyAI:
 	var enemy_scene: PackedScene = load("res://scenes/enemies/test_enemy.tscn")
 	var enemy: EnemyAI = enemy_scene.instantiate() as EnemyAI
 	enemy.name = enemy_name
@@ -939,10 +970,18 @@ func _spawn_ambush_enemy(enemy_name: String, spawn_pos: Vector3) -> EnemyAI:
 	enemy.use_contact_damage = true
 	enemy.contact_range = 1.2
 	enemy.contact_damage_cooldown = 0.6
-	enemy.start_state = EnemyAI.State.CHASE
+	enemy.start_state = initial_state
 	enemy.add_to_group(GENERATED_GROUP)
 	add_child(enemy)
-	AudioManager.play_3d("enemy_growl", enemy.global_position, -2.0, 0.85, 0.95)
+	if chase_delay > 0.0:
+		get_tree().create_timer(chase_delay).timeout.connect(
+			func() -> void:
+				if is_instance_valid(enemy):
+					enemy.force_state(EnemyAI.State.CHASE),
+			CONNECT_ONE_SHOT
+		)
+	else:
+		AudioManager.play_3d("enemy_growl", enemy.global_position, -2.0, 0.85, 0.95)
 	return enemy
 
 

@@ -1,0 +1,231 @@
+[gd_scene format=3 uid="uid://b42a6v3r15num"]
+
+[ext_resource type="Script" path="res://scripts/ui/end_credits.gd" id="1_script"]
+[ext_resource type="Shader" path="res://shaders/scanlines.gdshader" id="2_scanline"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_scan"]
+shader = ExtResource("2_scanline")
+shader_parameter/line_opacity = 0.09
+shader_parameter/line_spacing = 3.0
+
+[node name="EndCredits" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="BgColor" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.02, 0.03, 1)
+
+[node name="ScrollClip" type="Control" parent="."]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CreditsVBox" type="VBoxContainer" parent="ScrollClip"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+theme_override_constants/separation = 14
+alignment = 0
+mouse_filter = 2
+
+[node name="TitleLabel" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 34
+text = "THE VESSEL"
+horizontal_alignment = 1
+
+[node name="TitleSpacer" type="Control" parent="ScrollClip/CreditsVBox"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Role1" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.56, 0.5, 0.9)
+theme_override_font_sizes/font_size = 15
+text = "Created & Directed By"
+horizontal_alignment = 1
+
+[node name="Name1" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 26
+text = "Emir Yüksel"
+horizontal_alignment = 1
+
+[node name="Spacer1" type="Control" parent="ScrollClip/CreditsVBox"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Role2" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.56, 0.5, 0.9)
+theme_override_font_sizes/font_size = 15
+text = "Lead Programmer"
+horizontal_alignment = 1
+
+[node name="Name2" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.8, 0.72, 1)
+theme_override_font_sizes/font_size = 22
+text = "Emir Yüksel"
+horizontal_alignment = 1
+
+[node name="Spacer2" type="Control" parent="ScrollClip/CreditsVBox"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Role3" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.56, 0.5, 0.9)
+theme_override_font_sizes/font_size = 15
+text = "Game & Level Design"
+horizontal_alignment = 1
+
+[node name="Name3" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.8, 0.72, 1)
+theme_override_font_sizes/font_size = 22
+text = "Emir Yüksel"
+horizontal_alignment = 1
+
+[node name="Spacer3" type="Control" parent="ScrollClip/CreditsVBox"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Role4" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.56, 0.5, 0.9)
+theme_override_font_sizes/font_size = 15
+text = "Art & Atmosphere"
+horizontal_alignment = 1
+
+[node name="Name4" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.8, 0.72, 1)
+theme_override_font_sizes/font_size = 22
+text = "Emir Yüksel"
+horizontal_alignment = 1
+
+[node name="Spacer4" type="Control" parent="ScrollClip/CreditsVBox"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Role5" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.56, 0.5, 0.9)
+theme_override_font_sizes/font_size = 15
+text = "Sound Design & Audio"
+horizontal_alignment = 1
+
+[node name="Name5" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.8, 0.72, 1)
+theme_override_font_sizes/font_size = 22
+text = "Emir Yüksel"
+horizontal_alignment = 1
+
+[node name="Spacer5" type="Control" parent="ScrollClip/CreditsVBox"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Role6" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.56, 0.5, 0.9)
+theme_override_font_sizes/font_size = 15
+text = "Narrative & Writing"
+horizontal_alignment = 1
+
+[node name="Name6" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.8, 0.72, 1)
+theme_override_font_sizes/font_size = 22
+text = "Emir Yüksel"
+horizontal_alignment = 1
+
+[node name="Spacer6" type="Control" parent="ScrollClip/CreditsVBox"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Role7" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.56, 0.5, 0.9)
+theme_override_font_sizes/font_size = 15
+text = "Co-Producer"
+horizontal_alignment = 1
+
+[node name="Name7" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.8, 0.72, 1)
+theme_override_font_sizes/font_size = 22
+text = "Emir Yüksel"
+horizontal_alignment = 1
+
+[node name="Spacer7" type="Control" parent="ScrollClip/CreditsVBox"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="EngineLabel" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.52, 1)
+theme_override_font_sizes/font_size = 14
+text = "Made With Godot Engine"
+horizontal_alignment = 1
+
+[node name="Spacer8" type="Control" parent="ScrollClip/CreditsVBox"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="ThanksLabel" type="Label" parent="ScrollClip/CreditsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.68, 0.62, 1)
+theme_override_font_sizes/font_size = 20
+text = "Thank you for playing."
+horizontal_alignment = 1
+
+[node name="Scanlines" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("ShaderMaterial_scan")
+
+[node name="FadeLayer" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)

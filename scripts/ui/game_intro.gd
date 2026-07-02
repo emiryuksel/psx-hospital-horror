@@ -32,6 +32,24 @@ func play() -> void:
 	finished.emit()
 
 
+# Sadece bölüm başlığı "slam" efektini gösterir (konum kartı olmadan).
+# Part II gibi ara geçişlerde kullanılır. Ekran zaten karartılmış varsayılır.
+func play_chapter_only(part_text: String, subtitle_text: String) -> void:
+	if _playing:
+		return
+	_playing = true
+	_reset_visuals()
+	_black.color = Color(0.0, 0.0, 0.0, 0.0)
+	_location.modulate.a = 0.0
+	_part_label.text = part_text
+	_subtitle_label.text = subtitle_text
+	visible = true
+	await _play_chapter_title()
+	_playing = false
+	visible = false
+	finished.emit()
+
+
 func _reset_visuals() -> void:
 	_black.color = Color(0.0, 0.0, 0.0, 1.0)
 	_location.modulate.a = 0.0

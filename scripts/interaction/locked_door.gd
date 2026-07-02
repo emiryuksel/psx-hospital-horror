@@ -16,18 +16,36 @@ func _ready() -> void:
 
 func _on_interacted(_actor: Node3D) -> void:
 	if _is_unlocked:
-		prompt_text = "Door opens (placeholder)"
 		return
 
 	if InventoryManager.has_item(required_key_id):
 		_is_unlocked = true
-		prompt_text = "Door unlocked (placeholder)"
 		AudioManager.play_3d("exit_open", global_position, -4.0)
-		if _mesh and _mesh.material_override != null:
-			PsxMaterialHelper.set_albedo(_mesh.material_override, Color(0.35, 0.42, 0.38))
+		HudManager.show_message("Door unlocked")
+		_open_door()
 	else:
 		AudioManager.play_3d("door_locked", global_position, -2.0, 0.95, 1.05)
 		InventoryManager.note_requested.emit(locked_message, "Locked Door")
+
+
+# Kapıyı fiziksel olarak geçilebilir yap: collision kapat + mesh gizle.
+func _open_door() -> void:
+	prompt_text = "Open doorway"
+	for body in _find_static_bodies(self):
+		for c in body.get_children():
+			if c is CollisionShape3D:
+				(c as CollisionShape3D).disabled = true
+	if _mesh:
+		_mesh.visible = false
+
+
+func _find_static_bodies(node: Node) -> Array[StaticBody3D]:
+	var result: Array[StaticBody3D] = []
+	if node is StaticBody3D:
+		result.append(node as StaticBody3D)
+	for child in node.get_children():
+		result.append_array(_find_static_bodies(child))
+	return result
 
 
 func get_save_id() -> String:
@@ -40,6 +58,5 @@ func get_save_data() -> Dictionary:
 
 func apply_save_data(data: Dictionary) -> void:
 	_is_unlocked = bool(data.get("unlocked", false))
-	if _is_unlocked and _mesh and _mesh.material_override != null:
-		PsxMaterialHelper.set_albedo(_mesh.material_override, Color(0.35, 0.42, 0.38))
-		prompt_text = "Door unlocked (placeholder)"
+	if _is_unlocked:
+		_open_door()

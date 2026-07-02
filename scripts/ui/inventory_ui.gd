@@ -6,7 +6,6 @@ extends CanvasLayer
 @onready var _name_label: Label = $Panel/Margin/VBox/DetailPanel/NameLabel
 @onready var _desc_label: Label = $Panel/Margin/VBox/DetailPanel/DescLabel
 @onready var _use_button: Button = $Panel/Margin/VBox/DetailPanel/ButtonRow/UseButton
-@onready var _drop_button: Button = $Panel/Margin/VBox/DetailPanel/ButtonRow/DropButton
 @onready var _combine_button: Button = $Panel/Margin/VBox/DetailPanel/ButtonRow/CombineButton
 
 var _slot_buttons: Array[Button] = []
@@ -20,7 +19,6 @@ func _ready() -> void:
 	InventoryManager.inventory_changed.connect(_refresh_slots)
 	InventoryManager.inventory_toggled.connect(_on_inventory_toggled)
 	_use_button.pressed.connect(_on_use_pressed)
-	_drop_button.pressed.connect(_on_drop_pressed)
 	_combine_button.pressed.connect(_on_combine_pressed)
 	InventoryManager.close_inventory()
 
@@ -68,7 +66,6 @@ func _select_slot(index: int) -> void:
 		_name_label.text = "Empty"
 		_desc_label.text = ""
 		_use_button.disabled = true
-		_drop_button.disabled = true
 		_combine_button.disabled = true
 		return
 
@@ -77,7 +74,6 @@ func _select_slot(index: int) -> void:
 	_name_label.text = "%s x%d" % [item.display_name, count] if count > 1 else item.display_name
 	_desc_label.text = item.description
 	_use_button.disabled = not _can_use(item)
-	_drop_button.disabled = false
 	_combine_button.disabled = false
 
 
@@ -123,14 +119,6 @@ func _on_use_pressed() -> void:
 	InventoryManager.use_item(_selected_slot)
 	_refresh_slots()
 	_select_slot(_selected_slot)
-
-
-func _on_drop_pressed() -> void:
-	if _selected_slot < 0:
-		return
-	InventoryManager.drop_item(_selected_slot)
-	_clear_selection()
-	_refresh_slots()
 
 
 func _on_combine_pressed() -> void:

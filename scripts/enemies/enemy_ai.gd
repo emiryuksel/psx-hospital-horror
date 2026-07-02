@@ -453,6 +453,12 @@ func _on_died() -> void:
 	queue_free()
 
 
+func force_state(new_state: State) -> void:
+	_state = new_state
+	_state_timer = idle_duration
+	velocity = Vector3.ZERO
+
+
 func get_save_id() -> String:
 	return name
 

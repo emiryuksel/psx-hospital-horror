@@ -43,6 +43,11 @@ func create_item(item_id: String) -> Item:
 				"generator_fuse", "Generator Fuse", "A heavy ceramic fuse from the utility closet. Fits the lobby breaker.",
 				Item.ItemType.KEY, false, 1, [], "", "", 0.0, Color(0.82, 0.72, 0.35)
 			)
+		"maintenance_key":
+			return _make_item(
+				"maintenance_key", "Maintenance Key", "A grease-stained key tagged 'PUMP'. Opens the basement pump room.",
+				Item.ItemType.KEY, false, 1, [], "", "", 0.0, Color(0.7, 0.6, 0.3)
+			)
 		"pistol":
 			return _make_item(
 				"pistol", "Service Pistol", "A scratched 9mm sidearm. The grip is still warm. Whoever held it last isn't far.",

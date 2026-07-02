@@ -92,7 +92,23 @@ func _read_save_into_pending() -> bool:
 
 	_pending_load = parsed as Dictionary
 	_load_requested = true
+	# Kaydedilen aktif level'i GameSession'a bildir — reload sonrası doğru level yüklenir.
+	var saved_level: String = str(_pending_load.get("level", GameSession.PART1_SCENE))
+	if not saved_level.is_empty():
+		GameSession.active_level_path = saved_level
 	return true
+
+
+# Pending load'daki level, main.tscn'in gömülü default'undan (Part 1) farklı mı?
+func pending_level_needs_swap() -> bool:
+	if _pending_load.is_empty():
+		return false
+	var saved_level: String = str(_pending_load.get("level", GameSession.PART1_SCENE))
+	return saved_level != GameSession.PART1_SCENE and not saved_level.is_empty()
+
+
+func pending_level_path() -> String:
+	return str(_pending_load.get("level", GameSession.PART1_SCENE))
 
 
 func _reload_current_scene() -> void:
@@ -101,6 +117,15 @@ func _reload_current_scene() -> void:
 
 func has_pending_load() -> bool:
 	return not _pending_load.is_empty()
+
+
+func try_apply_to_current_scene() -> bool:
+	if _pending_load.is_empty():
+		return false
+	if _find_player() == null:
+		return false
+	apply_to_current_scene()
+	return true
 
 
 func apply_to_current_scene() -> void:
@@ -118,10 +143,7 @@ func apply_to_current_scene() -> void:
 	HudManager.hide_game_over()
 	AudioManager.stop_heartbeat()
 
-	var player_data: Dictionary = data.get("player", {})
-	if not player_data.is_empty():
-		player_data = player_data.duplicate()
-		player_data["is_dead"] = false
+	var player_data: Dictionary = _sanitize_player_load_data(data.get("player", {}))
 	_apply_player_state(player_data)
 	InventoryManager.import_slots(data.get("inventory", []))
 	_apply_combat_state(data.get("combat", {}))
@@ -142,6 +164,7 @@ func _collect_save_data() -> Dictionary:
 	return {
 		"version": SAVE_VERSION,
 		"scene": scene_path,
+		"level": GameSession.active_level_path,
 		"timestamp": Time.get_unix_time_from_system(),
 		"player": _get_player_state(),
 		"inventory": InventoryManager.export_slots(),
@@ -252,8 +275,35 @@ func _apply_world_state(data: Dictionary) -> void:
 			enemy.queue_free()
 
 
+func _sanitize_player_load_data(data: Dictionary) -> Dictionary:
+	if data.is_empty():
+		return data
+
+	var out := data.duplicate()
+	out["is_dead"] = false
+	var max_h := float(out.get("max_health", 100.0))
+	var health := float(out.get("health", max_h))
+	if health <= 0.0:
+		health = max_h
+	out["health"] = health
+	out["max_health"] = max_h
+	var max_s := float(out.get("max_stamina", 50.0))
+	out["stamina"] = clampf(float(out.get("stamina", max_s)), 0.0, max_s)
+	out["max_stamina"] = max_s
+	return out
+
+
 func _find_player() -> CharacterBody3D:
-	return get_tree().get_first_node_in_group("player") as CharacterBody3D
+	var vp := get_tree().root.find_child("GameViewport", true, false) as SubViewport
+	if vp:
+		for node in vp.find_children("*", "CharacterBody3D", true, false):
+			if node.is_in_group("player"):
+				return node as CharacterBody3D
+
+	for node in get_tree().get_nodes_in_group("player"):
+		if node is CharacterBody3D:
+			return node
+	return null
 
 
 func _find_combat() -> Node:

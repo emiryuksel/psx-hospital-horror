@@ -270,7 +270,9 @@ func get_save_data() -> Dictionary:
 		"rotation_y": rotation.y,
 		"pitch": _pitch,
 		"health": _health,
+		"max_health": max_health,
 		"stamina": _stamina,
+		"max_stamina": max_stamina,
 		"is_dead": _is_dead,
 	}
 
@@ -288,19 +290,19 @@ func apply_save_data(data: Dictionary) -> void:
 	rotation.y = _yaw
 	head.rotation.x = _pitch
 
-	_health = float(data.get("health", _health))
-	_stamina = float(data.get("stamina", _stamina))
-	_is_dead = bool(data.get("is_dead", false))
+	var max_h := float(data.get("max_health", max_health))
+	_health = clampf(float(data.get("health", _health)), 0.0, max_h)
+	var max_s := float(data.get("max_stamina", max_stamina))
+	_stamina = clampf(float(data.get("stamina", _stamina)), 0.0, max_s)
+	_is_dead = false
 
-	if _is_dead:
-		HudManager.show_game_over()
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	else:
-		HudManager.hide_game_over()
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	HudManager.hide_game_over()
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	_update_heartbeat()
 
 	HudManager.update_health(_health, max_health)
 	HudManager.update_stamina(_stamina, max_stamina)
+	HudManager.update_battery(_flashlight.battery, _flashlight.max_battery)
 	health_changed.emit(_health, max_health)
 	stamina_changed.emit(_stamina, max_stamina)
 

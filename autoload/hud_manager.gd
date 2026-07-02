@@ -18,6 +18,13 @@ func show_message(text: String) -> void:
 		_hud.show_message(text)
 
 
+func show_hint(text: String, duration: float = 4.5) -> void:
+	if _hud and _hud.has_method("show_hint"):
+		_hud.show_hint(text, duration)
+	elif _hud:
+		_hud.show_message(text)
+
+
 func hide_prompt() -> void:
 	if _hud:
 		_hud.hide_prompt()
@@ -126,3 +133,24 @@ func play_jumpscare(intensity: float = 1.0) -> void:
 func set_gameplay_hud_visible(visible: bool) -> void:
 	if _hud and _hud.has_method("set_gameplay_hud_visible"):
 		_hud.set_gameplay_hud_visible(visible)
+
+
+func fade_to_black(duration: float = 0.9, done: Callable = Callable()) -> void:
+	if _hud and _hud.has_method("fade_to_black"):
+		_hud.fade_to_black(duration, done)
+	elif done.is_valid():
+		done.call()
+
+
+func fade_from_black(duration: float = 0.9, done: Callable = Callable()) -> void:
+	if _hud and _hud.has_method("fade_from_black"):
+		_hud.fade_from_black(duration, done)
+	elif done.is_valid():
+		done.call()
+
+
+func show_end_card(done: Callable = Callable()) -> void:
+	if _hud and _hud.has_method("show_end_card"):
+		_hud.show_end_card(done)
+	elif done.is_valid():
+		done.call()

@@ -60,6 +60,27 @@ const POOLS: Dictionary = {
 		"They said I died on the 13th. Today's the 14th. …Is it?",
 		"Maybe I'm not trying to escape. Maybe I'm trying to remember how to stay.",
 	],
+	"basement_arrive": [
+		"It's colder down here. The mist came up through the floor.",
+		"The elevator sealed behind me. Of course it did.",
+		"No hum of machines. Just water dripping somewhere in the dark.",
+		"Basement. Where they kept the ones the wards couldn't hold.",
+	],
+	"morgue_dread": [
+		"Cold storage. The drawers are open. They shouldn't be open.",
+		"Something dragged itself out of here. The trail's still wet.",
+		"I count the drawers. One too many is empty.",
+		"Bodies don't stay cold down here. The note wasn't a metaphor.",
+	],
+	"valve_opened": [
+		"Coolant's moving. The generator might turn over now.",
+		"Steam and rust. The pipes remember how to breathe.",
+	],
+	"generator_online": [
+		"The generator caught. Lights first, then the elevator.",
+		"Power. For a second the whole floor exhaled — then something moved.",
+		"It's running. Now get back up before the mist decides otherwise.",
+	],
 }
 
 var _fired: Dictionary = {}

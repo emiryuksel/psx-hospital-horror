@@ -168,16 +168,6 @@ func combine_slots(slot_a: int, slot_b: int) -> bool:
 	return true
 
 
-func drop_item(slot_index: int) -> Item:
-	var entry: Dictionary = get_slot(slot_index)
-	if entry.is_empty():
-		return null
-
-	var item: Item = (entry["item"] as Item).duplicate_item()
-	remove_from_slot(slot_index, 1)
-	return item
-
-
 func export_slots() -> Array:
 	var result: Array = []
 	for entry in slots:

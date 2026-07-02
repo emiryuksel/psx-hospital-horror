@@ -61,12 +61,17 @@ var _weapon_anim_lock: bool = false
 var _objective_tween: Tween = null
 const _OBJECTIVE_REST_X := 10.0
 
+var _fade_overlay: ColorRect = null
+var _fade_tween: Tween = null
+var _end_card: Control = null
+
 
 func _ready() -> void:
 	HudManager.register(self)
 	_build_stat_icons()
 	_build_weapon_viewmodel()
 	_build_damage_overlay()
+	_build_fade_overlay()
 	_set_mouse_ignore(self, _game_over_panel)
 	_configure_game_over_mouse()
 	hide_prompt()
@@ -235,6 +240,126 @@ func _build_damage_overlay() -> void:
 		_vignette_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_vignette_overlay.modulate = Color(1.0, 1.0, 1.0, 0.0)
 		add_child(_vignette_overlay)
+
+
+# Tam ekran siyah geçiş (fade) overlay — level geçişlerinde kullanılır.
+func _build_fade_overlay() -> void:
+	_fade_overlay = ColorRect.new()
+	_fade_overlay.name = "FadeOverlay"
+	_fade_overlay.color = Color(0.0, 0.0, 0.0, 0.0)
+	_fade_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_fade_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fade_overlay.visible = false
+	add_child(_fade_overlay)
+
+
+# Ekranı karart. done callback fade tamamlanınca çağrılır.
+func fade_to_black(duration: float = 0.9, done: Callable = Callable()) -> void:
+	if _fade_overlay == null:
+		if done.is_valid():
+			done.call()
+		return
+	move_child(_fade_overlay, -1)
+	_fade_overlay.visible = true
+	if _fade_tween and is_instance_valid(_fade_tween):
+		_fade_tween.kill()
+	_fade_tween = create_tween()
+	_fade_tween.tween_property(_fade_overlay, "color:a", 1.0, maxf(0.01, duration))
+	if done.is_valid():
+		_fade_tween.tween_callback(done)
+
+
+# Karartmadan aç.
+func fade_from_black(duration: float = 0.9, done: Callable = Callable()) -> void:
+	if _fade_overlay == null:
+		if done.is_valid():
+			done.call()
+		return
+	move_child(_fade_overlay, -1)
+	_fade_overlay.visible = true
+	_fade_overlay.color.a = 1.0
+	if _fade_tween and is_instance_valid(_fade_tween):
+		_fade_tween.kill()
+	_fade_tween = create_tween()
+	_fade_tween.tween_property(_fade_overlay, "color:a", 0.0, maxf(0.01, duration))
+	_fade_tween.tween_callback(func() -> void:
+		if _fade_overlay:
+			_fade_overlay.visible = false
+	)
+	if done.is_valid():
+		_fade_tween.tween_callback(done)
+
+
+# Part II bitiş / credits kartı. MVP: kısa teşekkür + tek kişilik credits.
+# done callback kart kapanınca (ör. ana menüye dönüş) çağrılır.
+func show_end_card(done: Callable = Callable()) -> void:
+	if _end_card and is_instance_valid(_end_card):
+		_end_card.queue_free()
+
+	_end_card = ColorRect.new()
+	_end_card.name = "EndCard"
+	(_end_card as ColorRect).color = Color(0.02, 0.02, 0.03, 1.0)
+	_end_card.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_end_card.mouse_filter = Control.MOUSE_FILTER_STOP
+	_end_card.modulate.a = 0.0
+	add_child(_end_card)
+	move_child(_end_card, -1)
+
+	var vbox := VBoxContainer.new()
+	vbox.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 10)
+	_end_card.add_child(vbox)
+
+	var title := Label.new()
+	title.text = "PART II COMPLETE"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 34)
+	title.add_theme_color_override("font_color", Color(0.85, 0.82, 0.72))
+	vbox.add_child(title)
+
+	var thanks := Label.new()
+	thanks.text = "Thank you for playing."
+	thanks.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	thanks.add_theme_font_size_override("font_size", 18)
+	thanks.add_theme_color_override("font_color", Color(0.65, 0.64, 0.6))
+	vbox.add_child(thanks)
+
+	var spacer := Control.new()
+	spacer.custom_minimum_size = Vector2(0, 26)
+	vbox.add_child(spacer)
+
+	var credits_lines := [
+		"Design & Direction    Emir Yuksel",
+		"Programming    Emir Yuksel",
+		"Graphic Design    Emir Yuksel",
+		"Audio    Emir Yuksel",
+		"Producer    Emir Yuksel",
+	]
+	for line in credits_lines:
+		var lbl := Label.new()
+		lbl.text = line
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.add_theme_font_size_override("font_size", 14)
+		lbl.add_theme_color_override("font_color", Color(0.55, 0.55, 0.52))
+		vbox.add_child(lbl)
+
+	var spacer2 := Control.new()
+	spacer2.custom_minimum_size = Vector2(0, 30)
+	vbox.add_child(spacer2)
+
+	var footer := Label.new()
+	footer.text = "A game by Emir Yuksel"
+	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	footer.add_theme_font_size_override("font_size", 13)
+	footer.add_theme_color_override("font_color", Color(0.4, 0.42, 0.45))
+	vbox.add_child(footer)
+
+	var tween := create_tween()
+	tween.tween_property(_end_card, "modulate:a", 1.0, 1.0)
+	tween.tween_interval(4.5)
+	if done.is_valid():
+		tween.tween_callback(done)
 
 
 func _process(delta: float) -> void:
@@ -410,14 +535,18 @@ func set_low_health(is_low: bool) -> void:
 	_low_health = is_low
 	if _damage_overlay == null:
 		return
+	# Aktif bir hasar/jumpscare tween'i varsa iptal et — aksi halde iyileşince
+	# kirmizi overlay hedef degerine gitmeden takili kalabiliyor.
 	if _damage_tween and is_instance_valid(_damage_tween):
-		return
+		_damage_tween.kill()
 	var rest_alpha := 0.16 if _low_health else 0.0
+	_damage_overlay.color = Color(0.6, 0.0, 0.0, _damage_overlay.color.a)
 	var t := create_tween()
 	t.tween_property(_damage_overlay, "color:a", rest_alpha, 0.5)
 	if _vignette_overlay:
 		var vig_rest := 0.28 if _low_health else 0.0
 		t.parallel().tween_property(_vignette_overlay, "modulate:a", vig_rest, 0.5)
+	_damage_tween = t
 
 
 func _sync_objective() -> void:
@@ -456,6 +585,22 @@ func _configure_game_over_mouse() -> void:
 
 
 func _sync_initial_values() -> void:
+	if SaveManager.has_pending_load():
+		return
+	var player := get_tree().get_first_node_in_group("player")
+	if player and player.has_method("get_save_data"):
+		var data: Dictionary = player.get_save_data()
+		update_health(float(data.get("health", 100.0)), float(data.get("max_health", 100.0)))
+		update_stamina(float(data.get("stamina", 50.0)), float(data.get("max_stamina", 50.0)))
+		if player.has_node("Head/Flashlight"):
+			var flashlight = player.get_node("Head/Flashlight")
+			if flashlight.has_method("get_save_data"):
+				var battery_data: Dictionary = flashlight.get_save_data()
+				update_battery(
+					float(battery_data.get("battery", 100.0)),
+					float(battery_data.get("max_battery", 100.0))
+				)
+		return
 	update_health(100.0, 100.0)
 	update_stamina(50.0, 50.0)
 	update_battery(100.0, 100.0)
@@ -469,6 +614,17 @@ func show_prompt(text: String) -> void:
 func show_message(text: String) -> void:
 	_prompt_label.text = text
 	_prompt_label.visible = true
+
+
+# Oyun başı gibi anlarda kendiliğinden kaybolan ipucu (ör. TAB envanter).
+func show_hint(text: String, duration: float = 4.5) -> void:
+	_prompt_label.text = text
+	_prompt_label.visible = true
+	var expected := text
+	get_tree().create_timer(maxf(0.1, duration)).timeout.connect(func() -> void:
+		if is_instance_valid(_prompt_label) and _prompt_label.text == expected:
+			_prompt_label.visible = false
+	, CONNECT_ONE_SHOT)
 
 
 func hide_prompt() -> void:

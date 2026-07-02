@@ -33,6 +33,29 @@ func _ready() -> void:
 
 	if GameSession.consume_new_game_intro():
 		call_deferred("_start_new_game_intro")
+	elif SaveManager.has_pending_load() and SaveManager.pending_level_needs_swap():
+		# Part 1 dışında bir level'e ait save yükleniyor — gömülü default level'i
+		# doğru level ile değiştir (Part 2 vb.), sonra level kendi save'ini uygular.
+		call_deferred("_swap_to_saved_level")
+
+
+func _swap_to_saved_level() -> void:
+	var target := SaveManager.pending_level_path()
+	if target.is_empty():
+		return
+	var packed := load(target) as PackedScene
+	if packed == null or _sub_viewport == null:
+		push_error("PsxViewportSetup: kaydedilen level yüklenemedi: %s" % target)
+		return
+	for child in _sub_viewport.get_children():
+		if child is Node3D:
+			child.queue_free()
+			_sub_viewport.remove_child(child)
+			break
+	var level := packed.instantiate()
+	_sub_viewport.add_child(level)
+	_sub_viewport.move_child(level, 0)
+	GameSession.active_level_path = target
 
 
 func _start_new_game_intro() -> void:

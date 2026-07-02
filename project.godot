@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="psxhorror"
+config/name="The Vessel"
 run/main_scene="res://scenes/ui/studio_splash.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
@@ -33,6 +33,7 @@ PixelLabel="*res://autoload/pixel_label.gd"
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
+window/size/mode=3
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
